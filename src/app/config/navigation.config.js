@@ -2,7 +2,6 @@ import {
   Bolt,
   CircleDollarSign,
   LogOut,
-  PanelLeftClose,
 } from "lucide-react";
 
 import homeIcon from "../../shared/assets/icons/home.svg";
@@ -11,9 +10,7 @@ import vendorsIcon from "../../shared/assets/icons/people.svg";
 import usersIcon from "../../shared/assets/icons/profile-2user.svg";
 
 export const sidebarMeta = {
-  brand: "Hareer+",
   overviewLabel: "Overview",
-  brandActionIcon: PanelLeftClose,
   logoutIcon: LogOut,
 };
 

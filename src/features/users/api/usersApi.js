@@ -1,49 +1,65 @@
-import { API_ENDPOINTS } from "../../../services/api/endpoints";
-import {
-  createJsonBody,
-  JSON_HEADERS,
-  requestJson,
-  requestOk,
-} from "../../../services/api/client";
+import { usersListMock } from "../../../mocks/data/users.mock";
+import { delay } from "../../../mocks/utils/delay";
+import { createMockCrudStore } from "../../../mocks/utils/mockCrud";
+
+const store = createMockCrudStore(usersListMock, { idPrefix: "user-" });
+
+function formatDate(date = new Date()) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
 
 export async function getUsersList({ signal } = {}) {
-  return requestJson(API_ENDPOINTS.users.list, {
-    method: "GET",
-    signal,
-    fallbackMessage: "Failed to load users.",
-  });
+  await delay(120, { signal });
+  return store.list();
 }
 
 export async function createUser(payload) {
-  return requestJson(API_ENDPOINTS.users.create, {
-    method: "POST",
-    headers: JSON_HEADERS,
-    body: createJsonBody(payload),
-    fallbackMessage: "Failed to create user.",
+  await delay(180);
+
+  return store.create({
+    fullName: payload?.fullName ?? "",
+    email: payload?.email ?? "",
+    status: payload?.status ?? "active",
+    addedDate: formatDate(),
   });
 }
 
 export async function updateUser(userId, payload) {
-  return requestJson(API_ENDPOINTS.users.update(userId), {
-    method: "PUT",
-    headers: JSON_HEADERS,
-    body: createJsonBody(payload),
-    fallbackMessage: "Failed to update user.",
-  });
+  await delay(180);
+
+  try {
+    return store.update(userId, {
+      fullName: payload?.fullName ?? "",
+      email: payload?.email ?? "",
+      status: payload?.status ?? "active",
+    });
+  } catch {
+    throw new Error("User not found.");
+  }
 }
 
 export async function removeUser(userId) {
-  return requestOk(API_ENDPOINTS.users.remove(userId), {
-    method: "DELETE",
-    fallbackMessage: "Failed to delete user.",
-  });
+  await delay(160);
+
+  const removed = store.remove(userId);
+
+  if (!removed) {
+    throw new Error("User not found.");
+  }
+
+  return true;
 }
 
 export async function updateUserStatus(userId, status) {
-  return requestJson(API_ENDPOINTS.users.status(userId), {
-    method: "PATCH",
-    headers: JSON_HEADERS,
-    body: createJsonBody({ status }),
-    fallbackMessage: "Failed to update user status.",
-  });
+  await delay(160);
+
+  try {
+    return store.update(userId, { status });
+  } catch {
+    throw new Error("User not found.");
+  }
 }

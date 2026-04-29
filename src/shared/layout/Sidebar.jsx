@@ -5,6 +5,8 @@ import { X } from "lucide-react";
 import { navigationItems, sidebarMeta } from "../../app/config/navigation.config";
 import { AUTH_ROUTES } from "../../features/auth/constants/auth.constants";
 import { useAuthStore } from "../../features/auth/model/authStore";
+import hareerLogo from "../assets/logo/Hareer-logo.svg";
+import vectorIcon from "../assets/icons/vector.svg";
 
 function SidebarNavIcon({ item, isActive }) {
   if (item.iconType === "asset") {
@@ -64,7 +66,6 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const BrandActionIcon = sidebarMeta.brandActionIcon;
   const LogoutIcon = sidebarMeta.logoutIcon;
 
   const handleLogout = async () => {
@@ -100,9 +101,11 @@ export default function Sidebar({ isOpen, onClose }) {
         ].join(" ")}
       >
         <div className="flex h-[64px] shrink-0 items-center justify-between border-b border-[#E7E1DE] px-5 sm:h-[72px] sm:px-6 xl:h-[80px] xl:px-7">
-          <div className="min-w-0 truncate text-[24px] font-semibold tracking-[-0.02em] text-[#E3B2B2] xl:text-[28px]">
-            {sidebarMeta.brand}
-          </div>
+          <img
+            src={hareerLogo}
+            alt="Hareer"
+            className="w-[112px] shrink-0 object-contain sm:w-[124px]"
+          />
 
           <div className="flex shrink-0 items-center gap-2">
             <button
@@ -110,9 +113,11 @@ export default function Sidebar({ isOpen, onClose }) {
               className="grid h-9 w-9 place-items-center rounded-full text-[#2D2926] transition hover:bg-[#F1ECE9] xl:h-10 xl:w-10"
               aria-label="Sidebar action"
             >
-              <BrandActionIcon
-                className="h-5 w-5 xl:h-[22px] xl:w-[22px]"
-                strokeWidth={1.8}
+              <img
+                src={vectorIcon}
+                alt=""
+                aria-hidden="true"
+                className="h-[22px] w-[22px] object-contain xl:h-[24px] xl:w-[24px]"
               />
             </button>
 

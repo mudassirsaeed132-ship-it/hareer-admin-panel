@@ -1,50 +1,58 @@
-import { API_ENDPOINTS } from "../../../services/api/endpoints";
-import {
-  createJsonBody,
-  JSON_HEADERS,
-  requestJson,
-} from "../../../services/api/client";
+import { categoriesMock } from "../../../mocks/data/categories.mock";
+import { delay } from "../../../mocks/utils/delay";
+import { createMockCrudStore } from "../../../mocks/utils/mockCrud";
+
+const store = createMockCrudStore(categoriesMock, { idPrefix: "category-" });
 
 export async function getCategories({ signal } = {}) {
-  return requestJson(API_ENDPOINTS.categories.list, {
-    method: "GET",
-    signal,
-    fallbackMessage: "Failed to load categories.",
-  });
+  await delay(120, { signal });
+  return store.list();
 }
 
 export async function createCategory(payload) {
-  return requestJson(API_ENDPOINTS.categories.create, {
-    method: "POST",
-    headers: JSON_HEADERS,
-    body: createJsonBody(payload),
-    fallbackMessage: "Failed to create category.",
+  await delay(180);
+
+  return store.create({
+    categoryName: payload?.categoryName ?? "",
+    subcategories: payload?.subcategories ?? [],
+    productLimit: payload?.productLimit ?? "no-limit",
+    status: payload?.status ?? "active",
+    categoryType: payload?.categoryType ?? "shopping",
   });
 }
 
 export async function updateCategory(categoryId, payload) {
-  return requestJson(API_ENDPOINTS.categories.update(categoryId), {
-    method: "PUT",
-    headers: JSON_HEADERS,
-    body: createJsonBody(payload),
-    fallbackMessage: "Failed to update category.",
-  });
+  await delay(180);
+
+  try {
+    return store.update(categoryId, {
+      categoryName: payload?.categoryName,
+      subcategories: payload?.subcategories,
+      productLimit: payload?.productLimit,
+      status: payload?.status,
+      categoryType: payload?.categoryType,
+    });
+  } catch {
+    throw new Error("Category not found.");
+  }
 }
 
 export async function updateCategoryStatus(categoryId, status) {
-  return requestJson(API_ENDPOINTS.categories.status(categoryId), {
-    method: "PATCH",
-    headers: JSON_HEADERS,
-    body: createJsonBody({ status }),
-    fallbackMessage: "Failed to update category status.",
-  });
+  await delay(160);
+
+  try {
+    return store.update(categoryId, { status });
+  } catch {
+    throw new Error("Category not found.");
+  }
 }
 
 export async function updateCategoryProductLimit(categoryId, productLimit) {
-  return requestJson(API_ENDPOINTS.categories.productLimit(categoryId), {
-    method: "PATCH",
-    headers: JSON_HEADERS,
-    body: createJsonBody({ productLimit }),
-    fallbackMessage: "Failed to update product limit.",
-  });
+  await delay(160);
+
+  try {
+    return store.update(categoryId, { productLimit });
+  } catch {
+    throw new Error("Category not found.");
+  }
 }

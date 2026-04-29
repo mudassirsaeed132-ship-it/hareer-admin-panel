@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 
 import ukFlag from "../assets/icons/uk-flag.svg";
+import libyaFlag from "../assets/icons/libya-flag.svg";
 
 const LANGUAGE_OPTIONS = [
   {
@@ -14,13 +15,12 @@ const LANGUAGE_OPTIONS = [
     id: "ar",
     label: "Arabic",
     shortLabel: "AR",
-    flag: null,
+    flag: libyaFlag,
   },
 ];
 
 export default function LanguageSelect({ className = "" }) {
   const dropdownRef = useRef(null);
-
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGE_OPTIONS[0]);
 
@@ -63,18 +63,12 @@ export default function LanguageSelect({ className = "" }) {
         aria-expanded={isOpen}
         aria-label="Select language"
       >
-        {selectedLanguage.flag ? (
-          <img
-            src={selectedLanguage.flag}
-            alt=""
-            aria-hidden="true"
-            className="h-5 w-7 shrink-0 object-cover"
-          />
-        ) : (
-          <span className="grid h-5 w-7 shrink-0 place-items-center bg-white text-[11px] font-semibold">
-            {selectedLanguage.shortLabel}
-          </span>
-        )}
+        <img
+          src={selectedLanguage.flag}
+          alt=""
+          aria-hidden="true"
+          className="h-5 w-7 shrink-0 object-cover"
+        />
 
         <span className="hidden sm:inline">{selectedLanguage.label}</span>
 
@@ -109,20 +103,16 @@ export default function LanguageSelect({ className = "" }) {
                     : "text-[#6F6A67] hover:bg-[#F8F6F4] hover:text-[#1F1B1A]",
                 ].join(" ")}
               >
-                {language.flag ? (
-                  <img
-                    src={language.flag}
-                    alt=""
-                    aria-hidden="true"
-                    className="h-5 w-7 shrink-0 object-cover"
-                  />
-                ) : (
-                  <span className="grid h-5 w-7 shrink-0 place-items-center bg-[#F8F6F4] text-[11px] font-semibold">
-                    {language.shortLabel}
-                  </span>
-                )}
+                <img
+                  src={language.flag}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-5 w-7 shrink-0 object-cover"
+                />
 
-                <span className="min-w-0 flex-1 truncate">{language.label}</span>
+                <span className="min-w-0 flex-1 truncate">
+                  {language.label}
+                </span>
 
                 {isSelected && (
                   <Check className="h-4 w-4 shrink-0 text-[#E8B0B2]" />
