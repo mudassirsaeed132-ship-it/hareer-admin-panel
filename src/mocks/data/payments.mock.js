@@ -1,0 +1,58 @@
+export const PAYMENTS_SUMMARY = {
+  totalRevenue: 5456,
+  pendingPayments: 5456,
+  currency: "LYD",
+};
+
+export const PAYMENTS_ROWS = [
+  {
+    id: "payment-01",
+    serial: "01",
+    invoiceId: "#23 435 5G",
+    customerName: "Kevin Backer",
+    amount: 100,
+    currency: "LYD",
+    type: "Online Payment",
+    status: "paid",
+  },
+  {
+    id: "payment-02",
+    serial: "02",
+    invoiceId: "#23 435 5G",
+    customerName: "Kevin Backer",
+    amount: 100,
+    currency: "LYD",
+    type: "Online Payment",
+    status: "paid",
+  },
+  {
+    id: "payment-03",
+    serial: "03",
+    invoiceId: "#23 435 5G",
+    customerName: "Kevin Backer",
+    amount: 100,
+    currency: "LYD",
+    type: "Online Payment",
+    status: "pending",
+  },
+  {
+    id: "payment-04",
+    serial: "04",
+    invoiceId: "#23 435 5G",
+    customerName: "Kevin Backer",
+    amount: 100,
+    currency: "LYD",
+    type: "Online Payment",
+    status: "paid",
+  },
+  {
+    id: "payment-05",
+    serial: "05",
+    invoiceId: "#23 435 5G",
+    customerName: "Kevin Backer",
+    amount: 100,
+    currency: "LYD",
+    type: "Online Payment",
+    status: "paid",
+  },
+];
