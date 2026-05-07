@@ -9,25 +9,21 @@ export default function CategoriesToolbar({
   onTypeFilterChange,
 }) {
   return (
-    <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center lg:justify-end">
-      <div className="w-full lg:w-[280px] lg:flex-none">
-        <SearchField
-          className="w-full"
-          placeholder="Search here..."
-          value={searchQuery}
-          onChange={onSearchChange}
-        />
-      </div>
+    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto lg:justify-end">
+      <SearchField
+        className="h-11 w-full sm:w-[280px] lg:w-[320px]"
+        placeholder="Search here..."
+        value={searchQuery}
+        onChange={onSearchChange}
+      />
 
-      <div className="w-full lg:w-auto lg:min-w-[116px] lg:flex-none">
-        <FilterSelect
-          options={CATEGORY_TYPE_FILTER_OPTIONS}
-          value={typeFilter}
-          onChange={onTypeFilterChange}
-          className="w-full lg:w-auto"
-          label="Shopping"
-        />
-      </div>
+      <FilterSelect
+        options={CATEGORY_TYPE_FILTER_OPTIONS}
+        value={typeFilter}
+        onChange={onTypeFilterChange}
+        className="h-11 w-full sm:w-[160px]"
+        label="Shopping"
+      />
     </div>
   );
 }

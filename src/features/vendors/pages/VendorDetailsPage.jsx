@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import SearchField from "../../../shared/ui/SearchField";
@@ -6,6 +6,7 @@ import FilterSelect from "../../../shared/ui/FilterSelect";
 import PageSection from "../../../shared/ui/PageSection";
 import EmptyState from "../../../shared/ui/EmptyState";
 import Skeleton from "../../../shared/ui/Skeleton";
+import TablePagination from "../../../shared/ui/TablePagination";
 import VendorsTabs from "../components/VendorsTabs";
 import VendorProfileShell from "../components/VendorProfileShell";
 import VendorMetricsCards from "../components/VendorMetricsCards";
@@ -26,20 +27,29 @@ import {
   filterVendorProducts,
 } from "../utils/vendors.helpers";
 
+const VENDOR_DETAILS_PAGE_SIZE = 10;
+
 function VendorDetailSkeleton() {
   return (
     <div className="space-y-4">
       <Skeleton className="h-[40px] w-[160px]" />
       <Skeleton className="h-[180px] w-full" />
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Skeleton key={index} className="h-[120px] w-full" />
         ))}
       </div>
+
       <Skeleton className="h-[52px] w-full" />
       <Skeleton className="h-[360px] w-full" />
     </div>
   );
+}
+
+function paginateRows(rows = [], currentPage = 1) {
+  const startIndex = (currentPage - 1) * VENDOR_DETAILS_PAGE_SIZE;
+  return rows.slice(startIndex, startIndex + VENDOR_DETAILS_PAGE_SIZE);
 }
 
 export default function VendorDetailsPage() {
@@ -64,6 +74,7 @@ export default function VendorDetailsPage() {
   const [serviceQuery, setServiceQuery] = useState("");
   const [productsQuery, setProductsQuery] = useState("");
   const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredOrders = useMemo(() => {
     return filterVendorOrders(detail?.orders ?? [], ordersQuery, ordersStatus);
@@ -76,6 +87,30 @@ export default function VendorDetailsPage() {
   const filteredProducts = useMemo(() => {
     return filterVendorProducts(detail?.products ?? [], productsQuery);
   }, [detail?.products, productsQuery]);
+
+  const activeRows = useMemo(() => {
+    if (activeTab === "orders") return filteredOrders;
+    if (activeTab === "service-requests") return filteredServiceRequests;
+    return filteredProducts;
+  }, [activeTab, filteredOrders, filteredServiceRequests, filteredProducts]);
+
+  const totalItems = activeRows.length;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalItems / VENDOR_DETAILS_PAGE_SIZE)
+  );
+  const pageStartIndex = (currentPage - 1) * VENDOR_DETAILS_PAGE_SIZE;
+  const paginatedRows = paginateRows(activeRows, currentPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, ordersQuery, ordersStatus, serviceQuery, productsQuery]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   if (loading) {
     return <VendorDetailSkeleton />;
@@ -92,7 +127,7 @@ export default function VendorDetailsPage() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="space-y-5 xl:space-y-6">
+      <div className="w-full max-w-full space-y-5 overflow-hidden xl:space-y-6">
         <MotionDiv
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -129,6 +164,7 @@ export default function VendorDetailsPage() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...VENDORS_SECTION_TRANSITION, delay: 0.12 }}
+          className="max-w-full overflow-hidden"
         >
           {activeTab === "orders" ? (
             <PageSection
@@ -136,30 +172,33 @@ export default function VendorDetailsPage() {
               titleClassName="text-[18px] font-semibold leading-none text-[#151210]"
               headerClassName="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               action={
-                <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center lg:justify-end">
-                  <div className="w-full lg:w-[280px] lg:flex-none">
-                    <SearchField
-                      className="w-full"
-                      placeholder="Search here..."
-                      value={ordersQuery}
-                      onChange={(event) => setOrdersQuery(event.target.value)}
-                    />
-                  </div>
+                <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto lg:justify-end">
+                  <SearchField
+                    className="h-11 w-full sm:w-[280px] lg:w-[320px]"
+                    placeholder="Search here..."
+                    value={ordersQuery}
+                    onChange={(event) => setOrdersQuery(event.target.value)}
+                  />
 
-                  <div className="w-full lg:w-auto lg:min-w-[126px] lg:flex-none">
-                    <FilterSelect
-                      options={ORDER_STATUS_FILTER_OPTIONS}
-                      value={ordersStatus}
-                      onChange={(event) => setOrdersStatus(event.target.value)}
-                      className="w-full lg:w-auto"
-                      label="Accepted"
-                    />
-                  </div>
+                  <FilterSelect
+                    options={ORDER_STATUS_FILTER_OPTIONS}
+                    value={ordersStatus}
+                    onChange={(event) => setOrdersStatus(event.target.value)}
+                    className="h-11 w-full sm:w-[160px]"
+                    label="Accepted"
+                  />
                 </div>
               }
-              className="overflow-hidden"
+              className="max-w-full overflow-hidden border border-[#E7E1DE] bg-white"
             >
-              <VendorOrdersTable rows={filteredOrders} />
+              <VendorOrdersTable rows={paginatedRows} />
+
+              <TablePagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                pageSize={VENDOR_DETAILS_PAGE_SIZE}
+                onPageChange={setCurrentPage}
+              />
             </PageSection>
           ) : null}
 
@@ -170,18 +209,26 @@ export default function VendorDetailsPage() {
               headerClassName="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               action={
                 <SearchField
-                  className="w-full lg:w-[280px]"
+                  className="h-11 w-full lg:w-[300px]"
                   placeholder="Search here..."
                   value={serviceQuery}
                   onChange={(event) => setServiceQuery(event.target.value)}
                 />
               }
-              className="overflow-hidden"
+              className="max-w-full overflow-hidden border border-[#E7E1DE] bg-white"
             >
               <VendorServiceRequestsTable
-                rows={filteredServiceRequests}
+                rows={paginatedRows}
+                startIndex={pageStartIndex}
                 onReject={(row) => rejectServiceRequest(row.id)}
                 onAssign={(row) => setSelectedServiceRequest(row)}
+              />
+
+              <TablePagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                pageSize={VENDOR_DETAILS_PAGE_SIZE}
+                onPageChange={setCurrentPage}
               />
             </PageSection>
           ) : null}
@@ -193,15 +240,22 @@ export default function VendorDetailsPage() {
               headerClassName="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               action={
                 <SearchField
-                  className="w-full lg:w-[280px]"
+                  className="h-11 w-full lg:w-[300px]"
                   placeholder="Search here..."
                   value={productsQuery}
                   onChange={(event) => setProductsQuery(event.target.value)}
                 />
               }
-              className="overflow-hidden"
+              className="max-w-full overflow-hidden border border-[#E7E1DE] bg-white"
             >
-              <VendorProductsTable rows={filteredProducts} />
+              <VendorProductsTable rows={paginatedRows} />
+
+              <TablePagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                pageSize={VENDOR_DETAILS_PAGE_SIZE}
+                onPageChange={setCurrentPage}
+              />
             </PageSection>
           ) : null}
         </MotionDiv>

@@ -10,6 +10,11 @@ export const DASHBOARD_PERIOD_OPTIONS = [
   { label: "This Week", value: "this-week" },
 ];
 
+export const DEFAULT_DASHBOARD_DATE_RANGE = {
+  startDate: "2025-07-23",
+  endDate: "2025-07-30",
+};
+
 export const DASHBOARD_STAGGER_TRANSITION = {
   duration: 0.35,
   ease: [0.22, 1, 0.36, 1],

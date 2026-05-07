@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 import Table from "../../../shared/ui/Table";
+import TableCellPill from "../../../shared/ui/TableCellPill";
 import VendorStatusBadge from "./VendorStatusBadge";
 
 export default function VendorRequestsTable({
   rows = [],
+  startIndex = 0,
   onAccept,
   onReject,
 }) {
@@ -12,23 +14,27 @@ export default function VendorRequestsTable({
       {
         key: "serial",
         header: "Sr #",
-        cell: (_row, index) => String(index + 1).padStart(2, "0"),
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap font-medium",
+        width: "7%",
+        cell: (_row, index) => String(startIndex + index + 1).padStart(2, "0"),
+        headerClassName: "min-w-[70px] whitespace-nowrap",
+        cellClassName: "min-w-[70px] whitespace-nowrap font-semibold",
       },
       {
         key: "vendorName",
         header: "Vendor Name",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "14%",
+        headerClassName: "min-w-[135px] whitespace-nowrap",
+        cellClassName: "min-w-[135px] whitespace-nowrap",
       },
       {
         key: "businessName",
         header: "Business Name",
-        headerClassName: "whitespace-nowrap",
+        width: "18%",
+        headerClassName: "min-w-[170px] whitespace-nowrap",
+        cellClassName: "min-w-[170px]",
         cell: (row) => (
           <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center bg-[#F4F1EE] text-[12px] font-semibold text-[#6F6965]">
+            <div className="grid h-8 w-8 shrink-0 place-items-center bg-[#F4F1EE] text-[12px] font-semibold text-[#6F6965]">
               {row.businessLogoLabel}
             </div>
             <span className="whitespace-nowrap">{row.businessName}</span>
@@ -38,55 +44,66 @@ export default function VendorRequestsTable({
       {
         key: "category",
         header: "Category",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "12%",
+        headerClassName: "min-w-[120px] whitespace-nowrap",
+        cellClassName: "min-w-[120px] whitespace-nowrap",
       },
       {
         key: "website",
         header: "Website",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "14%",
+        headerClassName: "min-w-[130px] whitespace-nowrap",
+        cellClassName: "min-w-[130px] whitespace-nowrap",
       },
       {
         key: "location",
         header: "Location",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "15%",
+        headerClassName: "min-w-[145px] whitespace-nowrap",
+        cellClassName: "min-w-[145px] whitespace-nowrap",
       },
       {
         key: "status",
         header: "Status",
-        headerClassName: "whitespace-nowrap text-center",
+        width: "10%",
+        headerClassName: "min-w-[118px] whitespace-nowrap",
+        cellClassName: "min-w-[118px]",
         align: "center",
-        cell: (row) => <VendorStatusBadge status={row.status} />,
+        cell: (row) => <VendorStatusBadge status={row.status} size="lg" />,
       },
       {
         key: "action",
         header: "Action",
-        headerClassName: "whitespace-nowrap text-center",
+        width: "14%",
+        headerClassName: "min-w-[180px] whitespace-nowrap",
+        cellClassName: "min-w-[180px]",
         align: "center",
         cell: (row) => (
           <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-            <button
+            <TableCellPill
+              as="button"
               type="button"
+              size="md"
               onClick={() => onAccept(row)}
-              className="inline-flex min-w-[76px] items-center justify-center bg-[#E4B2B2] px-3 py-2 text-[14px] font-medium text-[#151210] transition hover:opacity-90"
+              className="bg-[#E4B2B2] text-[#151210] transition hover:opacity-90"
             >
               Accept
-            </button>
+            </TableCellPill>
 
-            <button
+            <TableCellPill
+              as="button"
               type="button"
+              size="md"
               onClick={() => onReject(row)}
-              className="inline-flex min-w-[74px] items-center justify-center border border-[#E7E1DE] bg-[#F8F5F3] px-3 py-2 text-[14px] font-medium text-[#151210] transition hover:bg-[#F2EEEB]"
+              className="border border-[#E7E1DE] bg-[#F8F5F3] text-[#151210] transition hover:bg-[#F2EEEB]"
             >
               Reject
-            </button>
+            </TableCellPill>
           </div>
         ),
       },
     ],
-    [onAccept, onReject]
+    [onAccept, onReject, startIndex]
   );
 
   return (
@@ -95,7 +112,7 @@ export default function VendorRequestsTable({
       rows={rows}
       rowKey={(row) => row.id}
       minWidthClassName="min-w-[1120px]"
-      tableClassName="table-auto"
+      tableClassName="table-fixed"
     />
   );
 }

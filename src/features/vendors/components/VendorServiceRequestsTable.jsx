@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 import Table from "../../../shared/ui/Table";
+import TableCellPill from "../../../shared/ui/TableCellPill";
 import ServiceRequestStatusBadge from "./ServiceRequestStatusBadge";
 
 export default function VendorServiceRequestsTable({
   rows = [],
+  startIndex = 0,
   onReject,
   onAssign,
 }) {
@@ -12,17 +14,20 @@ export default function VendorServiceRequestsTable({
       {
         key: "serial",
         header: "Sr #",
-        cell: (_row, index) => String(index + 1).padStart(2, "0"),
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap font-medium",
+        width: "7%",
+        cell: (_row, index) => String(startIndex + index + 1).padStart(2, "0"),
+        headerClassName: "min-w-[70px] whitespace-nowrap",
+        cellClassName: "min-w-[70px] whitespace-nowrap font-semibold",
       },
       {
         key: "vendorName",
         header: "Vendor Name",
-        headerClassName: "whitespace-nowrap",
+        width: "18%",
+        headerClassName: "min-w-[170px] whitespace-nowrap",
+        cellClassName: "min-w-[170px]",
         cell: (row) => (
           <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center bg-[#F4F1EE] text-[12px] font-semibold text-[#6F6965]">
+            <div className="grid h-8 w-8 shrink-0 place-items-center bg-[#F4F1EE] text-[12px] font-semibold text-[#6F6965]">
               {row.businessLogoLabel}
             </div>
             <span className="whitespace-nowrap">{row.vendorName}</span>
@@ -32,62 +37,76 @@ export default function VendorServiceRequestsTable({
       {
         key: "category",
         header: "Category",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "16%",
+        headerClassName: "min-w-[155px] whitespace-nowrap",
+        cellClassName: "min-w-[155px] whitespace-nowrap",
       },
       {
         key: "duration",
         header: "Duration",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "18%",
+        headerClassName: "min-w-[175px] whitespace-nowrap",
+        cellClassName: "min-w-[175px] whitespace-nowrap",
       },
       {
         key: "description",
         header: "Description",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "16%",
+        headerClassName: "min-w-[150px] whitespace-nowrap",
+        cellClassName: "min-w-[150px] whitespace-nowrap",
       },
       {
         key: "status",
         header: "Status",
-        headerClassName: "whitespace-nowrap text-center",
+        width: "10%",
+        headerClassName: "min-w-[118px] whitespace-nowrap",
+        cellClassName: "min-w-[118px]",
         align: "center",
-        cell: (row) => <ServiceRequestStatusBadge status={row.status} />,
+        cell: (row) => <ServiceRequestStatusBadge status={row.status} size="lg" />,
       },
       {
         key: "action",
         header: "Action",
-        headerClassName: "whitespace-nowrap text-center",
+        width: "18%",
+        headerClassName: "min-w-[230px] whitespace-nowrap",
+        cellClassName: "min-w-[230px]",
         align: "center",
         cell: (row) =>
           row.status === "accepted" ? (
             <div className="flex justify-center">
-              <span className="inline-flex min-w-[110px] items-center justify-center whitespace-nowrap bg-[#E7F5EC] px-3 py-2 text-[14px] font-medium text-[#2FB065]">
+              <TableCellPill
+                size="lg"
+                className="bg-[#E7F5EC] text-[#2FB065]"
+              >
                 Assigned
-              </span>
+              </TableCellPill>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-              <button
+              <TableCellPill
+                as="button"
                 type="button"
+                size="md"
                 onClick={() => onReject(row)}
-                className="inline-flex min-w-[82px] items-center justify-center border border-[#F04444] bg-white px-3 py-2 text-[14px] font-medium text-[#F04444] transition hover:bg-[#FFF5F5]"
+                className="border border-[#F04444] bg-white text-[#F04444] transition hover:bg-[#FFF5F5]"
               >
                 Reject
-              </button>
+              </TableCellPill>
 
-              <button
+              <TableCellPill
+                as="button"
                 type="button"
+                size="xl"
                 onClick={() => onAssign(row)}
-                className="inline-flex min-w-[124px] items-center justify-center bg-[#E4B2B2] px-3 py-2 text-[14px] font-medium text-[#151210] transition hover:opacity-90"
+                className="bg-[#E4B2B2] text-[#151210] transition hover:opacity-90"
               >
                 Accept & Assign
-              </button>
+              </TableCellPill>
             </div>
           ),
       },
     ],
-    [onAssign, onReject]
+    [onAssign, onReject, startIndex]
   );
 
   return (
@@ -96,7 +115,7 @@ export default function VendorServiceRequestsTable({
       rows={rows}
       rowKey={(row) => row.id}
       minWidthClassName="min-w-[1180px]"
-      tableClassName="table-auto"
+      tableClassName="table-fixed"
     />
   );
 }

@@ -8,33 +8,38 @@ export default function VendorProductsTable({ rows = [] }) {
       {
         key: "productName",
         header: "Product Name",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "28%",
+        headerClassName: "min-w-[180px] whitespace-nowrap",
+        cellClassName: "min-w-[180px] whitespace-nowrap font-medium",
       },
       {
         key: "sku",
         header: "SKU",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "18%",
+        headerClassName: "min-w-[120px] whitespace-nowrap",
+        cellClassName: "min-w-[120px] whitespace-nowrap",
       },
       {
         key: "category",
         header: "Category",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "18%",
+        headerClassName: "min-w-[130px] whitespace-nowrap",
+        cellClassName: "min-w-[130px] whitespace-nowrap",
       },
       {
         key: "stock",
         header: "Stock",
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        width: "14%",
+        headerClassName: "min-w-[90px] whitespace-nowrap",
+        cellClassName: "min-w-[90px] whitespace-nowrap",
       },
       {
         key: "price",
         header: "Price",
+        width: "18%",
         cell: (row) => formatCurrency(row.price, row.currency),
-        headerClassName: "whitespace-nowrap",
-        cellClassName: "whitespace-nowrap",
+        headerClassName: "min-w-[110px] whitespace-nowrap",
+        cellClassName: "min-w-[110px] whitespace-nowrap",
       },
     ],
     []
@@ -45,8 +50,8 @@ export default function VendorProductsTable({ rows = [] }) {
       columns={columns}
       rows={rows}
       rowKey={(row) => row.id}
-      minWidthClassName="min-w-[900px]"
-      tableClassName="table-auto"
+      minWidthClassName="min-w-[760px]"
+      tableClassName="table-fixed"
     />
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import PageHeader from "../../../shared/layout/PageHeader";
 import PageSection from "../../../shared/ui/PageSection";
@@ -6,6 +6,7 @@ import SearchField from "../../../shared/ui/SearchField";
 import FilterSelect from "../../../shared/ui/FilterSelect";
 import EmptyState from "../../../shared/ui/EmptyState";
 import Skeleton from "../../../shared/ui/Skeleton";
+import TablePagination from "../../../shared/ui/TablePagination";
 import VendorsTabs from "../components/VendorsTabs";
 import VendorsTable from "../components/VendorsTable";
 import VendorRequestsTable from "../components/VendorRequestsTable";
@@ -29,18 +30,25 @@ import {
   filterVendors,
 } from "../utils/vendors.helpers";
 
+const VENDORS_PAGE_SIZE = 10;
+
 function VendorsPageSkeleton() {
   return (
     <div className="space-y-5 xl:space-y-6">
       <div className="flex flex-col gap-3">
         <Skeleton className="h-10 w-[170px]" />
-        <Skeleton className="h-5 w-[280px]" />
+        <Skeleton className="h-5 w-[280px] max-w-full" />
       </div>
 
       <Skeleton className="h-[52px] w-full" />
       <Skeleton className="h-[420px] w-full" />
     </div>
   );
+}
+
+function paginateRows(rows = [], currentPage = 1) {
+  const startIndex = (currentPage - 1) * VENDORS_PAGE_SIZE;
+  return rows.slice(startIndex, startIndex + VENDORS_PAGE_SIZE);
 }
 
 export default function VendorsPage() {
@@ -65,6 +73,8 @@ export default function VendorsPage() {
   const [payoutMonthFilter, setPayoutMonthFilter] = useState("January 2026");
   const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [selectedPayout, setSelectedPayout] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const MotionDiv = m.div;
 
   const filteredVendors = useMemo(() => {
@@ -95,6 +105,40 @@ export default function VendorsPage() {
     return "Payouts";
   }, [activeTab]);
 
+  const activeRows = useMemo(() => {
+    if (activeTab === "vendors") return filteredVendors;
+    if (activeTab === "vendor-requests") return filteredVendorRequests;
+    if (activeTab === "service-requests") return filteredServiceRequests;
+    return filteredPayouts;
+  }, [
+    activeTab,
+    filteredVendors,
+    filteredVendorRequests,
+    filteredServiceRequests,
+    filteredPayouts,
+  ]);
+
+  const totalItems = activeRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / VENDORS_PAGE_SIZE));
+  const pageStartIndex = (currentPage - 1) * VENDORS_PAGE_SIZE;
+  const paginatedRows = paginateRows(activeRows, currentPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    activeTab,
+    searchQuery,
+    vendorStatusFilter,
+    payoutStatusFilter,
+    payoutMonthFilter,
+  ]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   if (loading) {
     return <VendorsPageSkeleton />;
   }
@@ -105,7 +149,7 @@ export default function VendorsPage() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="space-y-5 xl:space-y-6">
+      <div className="w-full max-w-full space-y-5 overflow-hidden xl:space-y-6">
         <MotionDiv
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -117,7 +161,7 @@ export default function VendorsPage() {
             action={
               <button
                 type="button"
-                className="inline-flex h-[52px] items-center justify-center bg-[#E4B2B2] px-5 text-[16px] font-medium text-[#151210] transition hover:opacity-90"
+                className="inline-flex h-11 w-full items-center justify-center bg-[#E4B2B2] px-4 text-[14px] font-medium text-[#151210] transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#E4B2B2]/60 focus:ring-offset-2 sm:h-[46px] sm:w-auto sm:px-5 sm:text-[15px] lg:h-[52px] lg:text-[16px]"
               >
                 Export PDF
               </button>
@@ -144,6 +188,7 @@ export default function VendorsPage() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...VENDORS_SECTION_TRANSITION, delay: 0.08 }}
+          className="max-w-full overflow-hidden"
         >
           <PageSection
             title={sectionTitle}
@@ -151,84 +196,76 @@ export default function VendorsPage() {
             headerClassName="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
             action={
               activeTab === "vendors" ? (
-                <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center lg:justify-end">
-                  <div className="w-full lg:w-[280px] lg:flex-none">
-                    <SearchField
-                      className="w-full"
-                      placeholder="Search here..."
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
-                    />
-                  </div>
+                <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto lg:justify-end">
+                  <SearchField
+                    className="h-11 w-full sm:w-[280px] lg:w-[320px]"
+                    placeholder="Search here..."
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
 
-                  <div className="w-full lg:w-auto lg:min-w-[112px] lg:flex-none">
-                    <FilterSelect
-                      options={VENDOR_STATUS_FILTER_OPTIONS}
-                      value={vendorStatusFilter}
-                      onChange={(event) =>
-                        setVendorStatusFilter(event.target.value)
-                      }
-                      className="w-full lg:w-auto"
-                      label="Active"
-                    />
-                  </div>
+                  <FilterSelect
+                    options={VENDOR_STATUS_FILTER_OPTIONS}
+                    value={vendorStatusFilter}
+                    onChange={(event) =>
+                      setVendorStatusFilter(event.target.value)
+                    }
+                    className="h-11 w-full sm:w-[160px]"
+                    label="Active"
+                  />
                 </div>
               ) : activeTab === "payouts" ? (
-                <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center lg:justify-end">
-                  <div className="w-full lg:w-[280px] lg:flex-none">
-                    <SearchField
-                      className="w-full"
-                      placeholder="Search by vendor..."
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
-                    />
-                  </div>
+                <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto lg:justify-end">
+                  <SearchField
+                    className="h-11 w-full sm:w-[260px] lg:w-[300px]"
+                    placeholder="Search by vendor..."
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
 
-                  <div className="w-full lg:w-auto lg:min-w-[126px] lg:flex-none">
-                    <FilterSelect
-                      options={PAYOUT_STATUS_FILTER_OPTIONS}
-                      value={payoutStatusFilter}
-                      onChange={(event) =>
-                        setPayoutStatusFilter(event.target.value)
-                      }
-                      className="w-full lg:w-auto"
-                      label="Pending"
-                    />
-                  </div>
+                  <FilterSelect
+                    options={PAYOUT_STATUS_FILTER_OPTIONS}
+                    value={payoutStatusFilter}
+                    onChange={(event) =>
+                      setPayoutStatusFilter(event.target.value)
+                    }
+                    className="h-11 w-full sm:w-[160px]"
+                    label="Pending"
+                  />
 
-                  <div className="w-full lg:w-auto lg:min-w-[150px] lg:flex-none">
-                    <FilterSelect
-                      options={PAYOUT_MONTH_FILTER_OPTIONS}
-                      value={payoutMonthFilter}
-                      onChange={(event) =>
-                        setPayoutMonthFilter(event.target.value)
-                      }
-                      className="w-full lg:w-auto"
-                      label="January 2026"
-                    />
-                  </div>
+                  <FilterSelect
+                    options={PAYOUT_MONTH_FILTER_OPTIONS}
+                    value={payoutMonthFilter}
+                    onChange={(event) =>
+                      setPayoutMonthFilter(event.target.value)
+                    }
+                    className="h-11 w-full sm:w-[170px]"
+                    label="January 2026"
+                  />
                 </div>
               ) : (
                 <SearchField
-                  className="w-full lg:w-[280px]"
+                  className="h-11 w-full lg:w-[300px]"
                   placeholder="Search here..."
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
               )
             }
-            className="overflow-hidden"
+            className="max-w-full overflow-hidden border border-[#E7E1DE] bg-white"
           >
             {activeTab === "vendors" ? (
               <VendorsTable
-                rows={filteredVendors}
+                rows={paginatedRows}
+                startIndex={pageStartIndex}
                 onToggleStatus={toggleVendorRowStatus}
               />
             ) : null}
 
             {activeTab === "vendor-requests" ? (
               <VendorRequestsTable
-                rows={filteredVendorRequests}
+                rows={paginatedRows}
+                startIndex={pageStartIndex}
                 onAccept={(row) => handleVendorRequestDecision(row, "accept")}
                 onReject={(row) => handleVendorRequestDecision(row, "reject")}
               />
@@ -236,7 +273,8 @@ export default function VendorsPage() {
 
             {activeTab === "service-requests" ? (
               <VendorServiceRequestsTable
-                rows={filteredServiceRequests}
+                rows={paginatedRows}
+                startIndex={pageStartIndex}
                 onReject={(row) => handleRejectServiceRequest(row.id)}
                 onAssign={(row) => setSelectedServiceRequest(row)}
               />
@@ -244,11 +282,19 @@ export default function VendorsPage() {
 
             {activeTab === "payouts" ? (
               <VendorPayoutsTable
-                rows={filteredPayouts}
+                rows={paginatedRows}
+                startIndex={pageStartIndex}
                 onOpenCommission={(row) => setSelectedPayout(row)}
                 onReleasePayment={(row) => handleReleasePayout(row.id)}
               />
             ) : null}
+
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              pageSize={VENDORS_PAGE_SIZE}
+              onPageChange={setCurrentPage}
+            />
           </PageSection>
         </MotionDiv>
 

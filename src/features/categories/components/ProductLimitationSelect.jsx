@@ -10,11 +10,11 @@ export default function ProductLimitationSelect({
   className = "",
 }) {
   return (
-    <div className={cn("relative w-[212px] max-w-full", className)}>
+    <div className={cn("relative w-full max-w-[212px]", className)}>
       <select
         value={value}
         onChange={onChange}
-        className="h-[38px] w-full appearance-none border border-[#EEE8E4] bg-[#FCFAF8] px-3 pr-10 text-[15px] font-normal text-[#151210] outline-none"
+        className="h-9 w-full appearance-none border border-[#E7E1DE] bg-[#FCFAF8] px-3 pr-9 text-[14px] font-normal text-[#151210] outline-none transition focus:border-[#E4B2B2]"
       >
         <option value="no-limit">No Limit</option>
         <option value="up-to-50">Up to 50 products</option>

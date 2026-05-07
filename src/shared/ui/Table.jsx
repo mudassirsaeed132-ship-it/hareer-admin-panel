@@ -20,17 +20,17 @@ export default function Table({
   emptyMessage = "No data available.",
   className = "",
   tableClassName = "",
-  minWidthClassName = "min-w-[1180px]",
+  minWidthClassName = "min-w-[980px]",
   showVerticalDividers = true,
 }) {
   const hasRows = Array.isArray(rows) && rows.length > 0;
 
   return (
     <div
-      className={`table-scroll-area w-full overflow-x-auto overflow-y-hidden ${className}`}
+      className={`table-scroll-area w-full max-w-full overflow-x-auto overflow-y-hidden ${className}`}
     >
       <table
-        className={`w-full border-collapse ${minWidthClassName} ${tableClassName}`}
+        className={`w-full border-collapse border-spacing-0 border-t border-[#E7E1DE] ${minWidthClassName} ${tableClassName}`}
       >
         <thead>
           <tr className="border-b border-[#E7E1DE]">
@@ -42,9 +42,11 @@ export default function Table({
                   key={column.key ?? index}
                   style={column.width ? { width: column.width } : undefined}
                   className={[
-                    "bg-white px-4 py-4 align-middle text-[13px] font-medium leading-[1.5] text-[#7E7671] sm:px-5 sm:py-5 xl:px-6",
+                    "bg-white px-3 py-3 align-middle text-[12px] font-medium leading-[1.35] text-[#7E7671]",
                     getAlignClass(column.align),
-                    showVerticalDividers && !isLast ? "border-r border-[#E7E1DE]" : "",
+                    showVerticalDividers && !isLast
+                      ? "border-r border-[#E7E1DE]"
+                      : "",
                     column.headerClassName ?? "",
                   ].join(" ")}
                 >
@@ -75,9 +77,11 @@ export default function Table({
                       <td
                         key={column.key ?? columnIndex}
                         className={[
-                          "bg-white px-4 py-5 align-middle text-[15px] leading-[1.6] text-[#1B1716] sm:px-5 sm:py-6 xl:px-6 xl:py-7 xl:text-[16px]",
+                          "bg-white px-3 py-3 align-middle text-[14px] leading-[1.35] text-[#151210]",
                           getAlignClass(column.align),
-                          showVerticalDividers && !isLast ? "border-r border-[#E7E1DE]" : "",
+                          showVerticalDividers && !isLast
+                            ? "border-r border-[#E7E1DE]"
+                            : "",
                           column.cellClassName ?? "",
                         ].join(" ")}
                       >
@@ -92,7 +96,7 @@ export default function Table({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-6 py-12 text-center text-[15px] text-[#7E7671]"
+                className="px-4 py-10 text-center text-[14px] text-[#7E7671]"
               >
                 {emptyMessage}
               </td>

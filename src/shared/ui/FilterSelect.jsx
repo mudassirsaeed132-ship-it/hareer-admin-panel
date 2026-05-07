@@ -12,6 +12,10 @@ export default function FilterSelect({
   value,
   onChange,
   name,
+  ariaLabel,
+  ariaHaspopup,
+  ariaExpanded,
+  ariaControls,
 }) {
   const hasOptions = Array.isArray(options) && options.length > 0;
 
@@ -30,6 +34,7 @@ export default function FilterSelect({
           value={value}
           onChange={onChange}
           disabled={disabled}
+          aria-label={ariaLabel}
           className="h-full min-w-0 w-full appearance-none border-none bg-transparent pr-8 text-[16px] font-medium text-[#1F1B1A] outline-none"
         >
           {options.map((option) => (
@@ -54,6 +59,10 @@ export default function FilterSelect({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
+      aria-haspopup={ariaHaspopup}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
       className={cn(
         "inline-flex h-[52px] w-full shrink-0 items-center gap-2 border border-[#E7E1DE] bg-white px-3 text-[16px] font-medium text-[#1F1B1A] transition-colors hover:bg-[#FCFAF9] disabled:cursor-not-allowed disabled:opacity-60",
         className

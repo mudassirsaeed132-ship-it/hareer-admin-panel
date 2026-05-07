@@ -9,9 +9,9 @@ export default function OrdersToolbar({
   onStatusChange,
 }) {
   return (
-    <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
       <SearchField
-        className="w-full lg:w-[280px]"
+        className="h-11 w-full sm:w-[270px] lg:w-[300px]"
         placeholder="Search here..."
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
@@ -22,7 +22,7 @@ export default function OrdersToolbar({
         value={status}
         onChange={(event) => onStatusChange(event.target.value)}
         label="All Statuses"
-        className="w-full lg:w-[170px]"
+        className="h-11 w-full sm:w-[170px]"
       />
     </div>
   );

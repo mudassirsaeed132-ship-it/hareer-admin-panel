@@ -1,4 +1,5 @@
 import { CalendarDays } from "lucide-react";
+import { useState } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import PageHeader from "../../../shared/layout/PageHeader";
 import FilterSelect from "../../../shared/ui/FilterSelect";
@@ -6,11 +7,13 @@ import Skeleton from "../../../shared/ui/Skeleton";
 import EmptyState from "../../../shared/ui/EmptyState";
 import usePrefersReducedMotion from "../../../shared/hooks/usePrefersReducedMotion";
 import useDashboardData from "../hooks/useDashboardData";
+import DashboardDateRangeModal from "../components/DashboardDateRangeModal";
 import DashboardMetrics from "../components/DashboardMetrics";
 import OrdersOverviewChart from "../components/OrdersOverviewChart";
 import PaymentsOverviewChart from "../components/PaymentsOverviewChart";
 import TopSellingStoresTable from "../components/TopSellingStoresTable";
 import {
+  DEFAULT_DASHBOARD_DATE_RANGE,
   DASHBOARD_SECTION_TRANSITION,
   DASHBOARD_STAGGER_TRANSITION,
 } from "../constants/dashboard.constants";
@@ -23,9 +26,12 @@ function DashboardPageSkeleton() {
         <Skeleton className="h-[48px] w-[220px] rounded-[16px]" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="border border-[#E9E3DF] bg-white px-5 py-5 sm:px-6 sm:py-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div
+            key={index}
+            className="border border-[#E9E3DF] bg-white px-5 py-5 sm:px-6 sm:py-6"
+          >
             <Skeleton className="h-7 w-7 rounded-full" />
             <Skeleton className="mt-8 h-7 w-[120px] rounded-[8px]" />
             <Skeleton className="mt-3 h-4 w-[110px] rounded-[8px]" />
@@ -45,7 +51,9 @@ function DashboardPageSkeleton() {
 
 export default function DashboardPage() {
   const shouldReduceMotion = usePrefersReducedMotion();
-  const { data, loading, error, refetch } = useDashboardData();
+  const [dateRange, setDateRange] = useState(DEFAULT_DASHBOARD_DATE_RANGE);
+  const [isDateRangeModalOpen, setIsDateRangeModalOpen] = useState(false);
+  const { data, loading, error, refetch } = useDashboardData(dateRange);
   const MotionDiv = m.div;
 
   if (loading) {
@@ -113,8 +121,12 @@ export default function DashboardPage() {
               <FilterSelect
                 icon={CalendarDays}
                 label={data.dateRangeLabel}
+                onClick={() => setIsDateRangeModalOpen(true)}
+                ariaLabel={`Select dashboard date range. Current range: ${data.dateRangeLabel}`}
+                ariaHaspopup="dialog"
+                ariaExpanded={isDateRangeModalOpen}
                 showChevron={false}
-                className="rounded-[16px] border-transparent px-4"
+                className="rounded-[16px] border-transparent px-4 sm:min-w-[220px]"
               />
             }
           />
@@ -139,6 +151,16 @@ export default function DashboardPage() {
         <MotionDiv {...sectionMotion}>
           <TopSellingStoresTable rows={data.topSellingStores} />
         </MotionDiv>
+
+        <DashboardDateRangeModal
+          open={isDateRangeModalOpen}
+          dateRange={dateRange}
+          onClose={() => setIsDateRangeModalOpen(false)}
+          onApply={(nextDateRange) => {
+            setDateRange(nextDateRange);
+            setIsDateRangeModalOpen(false);
+          }}
+        />
       </div>
     </LazyMotion>
   );

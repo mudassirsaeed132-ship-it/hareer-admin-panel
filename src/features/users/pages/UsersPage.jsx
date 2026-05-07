@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import PageHeader from "../../../shared/layout/PageHeader";
 import PageSection from "../../../shared/ui/PageSection";
@@ -15,13 +16,13 @@ function UsersPageSkeleton() {
     <div className="space-y-5 xl:space-y-6">
       <div className="flex flex-col gap-3">
         <Skeleton className="h-10 w-[140px]" />
-        <Skeleton className="h-5 w-[300px]" />
+        <Skeleton className="h-5 w-[300px] max-w-full" />
       </div>
 
       <div className="border border-[#E9E3DF] bg-white p-5 sm:p-6 xl:p-7">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <Skeleton className="h-7 w-[120px]" />
-          <Skeleton className="h-[48px] w-[280px]" />
+          <Skeleton className="h-[48px] w-full lg:w-[280px]" />
         </div>
 
         <div className="mt-5">
@@ -33,6 +34,8 @@ function UsersPageSkeleton() {
 }
 
 export default function UsersPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const {
     users,
     loading,
@@ -55,12 +58,27 @@ export default function UsersPage() {
     [editingUser]
   );
 
+  const removeModeFromUrl = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("mode");
+    setSearchParams(nextParams, { replace: true });
+  };
+
   const openCreateModal = () => {
     setEditingUser(null);
     setIsFormModalOpen(true);
   };
 
+  const openCreateModalFromButton = () => {
+    openCreateModal();
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("mode", "add");
+    setSearchParams(nextParams, { replace: true });
+  };
+
   const openEditModal = (user) => {
+    removeModeFromUrl();
     setEditingUser(user);
     setIsFormModalOpen(true);
   };
@@ -68,6 +86,7 @@ export default function UsersPage() {
   const closeFormModal = () => {
     setIsFormModalOpen(false);
     setEditingUser(null);
+    removeModeFromUrl();
   };
 
   const handleSubmitUser = async (values) => {
@@ -84,6 +103,15 @@ export default function UsersPage() {
     await deleteUserRecord(user.id);
   };
 
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+
+    if (mode === "add") {
+      setEditingUser(null);
+      setIsFormModalOpen(true);
+    }
+  }, [searchParams]);
+
   if (loading) {
     return <UsersPageSkeleton />;
   }
@@ -99,7 +127,7 @@ export default function UsersPage() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="space-y-5 xl:space-y-6">
+      <div className="w-full max-w-full space-y-5 overflow-hidden xl:space-y-6">
         <MotionDiv
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -111,8 +139,9 @@ export default function UsersPage() {
             action={
               <button
                 type="button"
-                onClick={openCreateModal}
-                className="inline-flex h-[52px] items-center justify-center bg-[#E4B2B2] px-5 text-[16px] font-medium text-[#151210] transition hover:opacity-90"
+                onClick={openCreateModalFromButton}
+                aria-label="Add new user"
+                className="inline-flex h-11 w-full items-center justify-center bg-[#E4B2B2] px-4 text-[14px] font-medium text-[#151210] transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#E4B2B2]/60 focus:ring-offset-2 sm:h-[46px] sm:w-auto sm:px-5 sm:text-[15px] lg:h-[52px] lg:text-[16px]"
               >
                 + Add new user
               </button>
@@ -123,7 +152,12 @@ export default function UsersPage() {
         <MotionDiv
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: 0.04 }}
+          transition={{
+            duration: 0.3,
+            ease: [0.22, 1, 0.36, 1],
+            delay: 0.04,
+          }}
+          className="max-w-full overflow-hidden"
         >
           <PageSection
             title="Users List"
@@ -135,7 +169,7 @@ export default function UsersPage() {
                 onQueryChange={setQuery}
               />
             }
-            className="overflow-hidden"
+            className="max-w-full overflow-hidden border border-[#E7E1DE] bg-white"
           >
             <UsersTable
               rows={filteredUsers}

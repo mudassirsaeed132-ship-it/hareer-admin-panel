@@ -1,6 +1,11 @@
 export const QUERY_KEYS = {
   dashboard: {
-    summary: () => ["dashboard", "summary"],
+    summary: ({ startDate = "", endDate = "" } = {}) => [
+      "dashboard",
+      "summary",
+      String(startDate || ""),
+      String(endDate || ""),
+    ],
   },
 
   orders: {
