@@ -42,7 +42,7 @@ export default function Table({
                   key={column.key ?? index}
                   style={column.width ? { width: column.width } : undefined}
                   className={[
-                    "bg-white px-3 py-3 align-middle text-[12px] font-medium leading-[1.35] text-[#7E7671]",
+                    "bg-white px-2.5 py-2.5 align-middle text-[12px] font-medium leading-[1.35] text-[#7E7671]",
                     getAlignClass(column.align),
                     showVerticalDividers && !isLast
                       ? "border-r border-[#E7E1DE]"
@@ -77,7 +77,7 @@ export default function Table({
                       <td
                         key={column.key ?? columnIndex}
                         className={[
-                          "bg-white px-3 py-3 align-middle text-[14px] leading-[1.35] text-[#151210]",
+                          "bg-white px-2.5 py-2.5 align-middle text-[14px] leading-[1.35] text-[#151210]",
                           getAlignClass(column.align),
                           showVerticalDividers && !isLast
                             ? "border-r border-[#E7E1DE]"

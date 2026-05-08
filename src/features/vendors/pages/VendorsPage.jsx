@@ -7,6 +7,7 @@ import FilterSelect from "../../../shared/ui/FilterSelect";
 import EmptyState from "../../../shared/ui/EmptyState";
 import Skeleton from "../../../shared/ui/Skeleton";
 import TablePagination from "../../../shared/ui/TablePagination";
+import InlineFeedback from "../../../shared/ui/InlineFeedback";
 import VendorsTabs from "../components/VendorsTabs";
 import VendorsTable from "../components/VendorsTable";
 import VendorRequestsTable from "../components/VendorRequestsTable";
@@ -32,6 +33,66 @@ import {
 
 const VENDORS_PAGE_SIZE = 10;
 
+const EXPORT_CONFIG = {
+  vendors: {
+    fileName: "vendors-export.pdf",
+    title: "Vendors Export",
+    columns: [
+      { label: "Vendor Name", value: (row) => row.vendorName },
+      { label: "Business Name", value: (row) => row.businessName },
+      { label: "Category", value: (row) => row.category },
+      { label: "Website", value: (row) => row.website },
+      { label: "Location", value: (row) => row.location },
+      { label: "Status", value: (row) => row.status },
+    ],
+  },
+  "vendor-requests": {
+    fileName: "vendor-requests-export.pdf",
+    title: "Vendor Requests Export",
+    columns: [
+      { label: "Vendor Name", value: (row) => row.vendorName },
+      { label: "Business Name", value: (row) => row.businessName },
+      { label: "Category", value: (row) => row.category },
+      { label: "Website", value: (row) => row.website },
+      { label: "Location", value: (row) => row.location },
+      { label: "Status", value: (row) => row.status },
+    ],
+  },
+  "service-requests": {
+    fileName: "service-requests-export.pdf",
+    title: "Service Requests Export",
+    columns: [
+      { label: "Vendor Name", value: (row) => row.vendorName },
+      { label: "Category", value: (row) => row.category },
+      { label: "Duration", value: (row) => row.duration },
+      { label: "Description", value: (row) => row.description },
+      { label: "Status", value: (row) => row.status },
+      { label: "Riders Needed", value: (row) => row.ridersNeeded },
+      { label: "Service Fee", value: (row) => row.serviceFee },
+      { label: "Payment Terms", value: (row) => row.paymentTerms },
+    ],
+  },
+  payouts: {
+    fileName: "payouts-export.pdf",
+    title: "Payouts Export",
+    columns: [
+      { label: "Vendor", value: (row) => row.vendorName },
+      { label: "Owner Name", value: (row) => row.ownerName },
+      { label: "Month", value: (row) => row.month },
+      {
+        label: "Total Sales",
+        value: (row) => `${row.totalSales ?? 0} ${row.currency ?? ""}`.trim(),
+      },
+      { label: "Status", value: (row) => row.status },
+      { label: "Commission Rate", value: (row) => `${row.commissionRate ?? 0}%` },
+      {
+        label: "Commission Amount",
+        value: (row) => `${row.commissionAmount ?? 0} ${row.currency ?? ""}`.trim(),
+      },
+    ],
+  },
+};
+
 function VendorsPageSkeleton() {
   return (
     <div className="space-y-5 xl:space-y-6">
@@ -49,6 +110,160 @@ function VendorsPageSkeleton() {
 function paginateRows(rows = [], currentPage = 1) {
   const startIndex = (currentPage - 1) * VENDORS_PAGE_SIZE;
   return rows.slice(startIndex, startIndex + VENDORS_PAGE_SIZE);
+}
+
+function cleanPdfText(value) {
+  if (value === null || value === undefined) return "—";
+
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  return String(value)
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function escapePdfText(value) {
+  return cleanPdfText(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+}
+
+function truncatePdfText(value, maxLength = 90) {
+  const text = cleanPdfText(value);
+
+  if (text.length <= maxLength) return text;
+
+  return `${text.slice(0, maxLength - 3)}...`;
+}
+
+function buildPdfLines({ title, rows, columns }) {
+  const lines = [
+    title,
+    `Generated: ${new Date().toLocaleString()}`,
+    `Total Records: ${rows.length}`,
+    "",
+  ];
+
+  rows.forEach((row, index) => {
+    lines.push(`Record ${String(index + 1).padStart(2, "0")}`);
+
+    columns.forEach((column) => {
+      const value =
+        typeof column.value === "function" ? column.value(row, index) : row[column.key];
+
+      lines.push(`${column.label}: ${truncatePdfText(value)}`);
+    });
+
+    lines.push("");
+  });
+
+  return lines;
+}
+
+function createPdfBlob({ title, rows, columns }) {
+  const lines = buildPdfLines({ title, rows, columns });
+  const linesPerPage = 44;
+  const pages = [];
+
+  for (let index = 0; index < lines.length; index += linesPerPage) {
+    pages.push(lines.slice(index, index + linesPerPage));
+  }
+
+  const objects = [];
+  const offsets = [];
+  const pageObjectIds = [];
+  const contentObjectIds = [];
+
+  const addObject = (content) => {
+    objects.push(content);
+    return objects.length;
+  };
+
+  const catalogId = addObject("<< /Type /Catalog /Pages 2 0 R >>");
+  const pagesId = addObject("");
+
+  pages.forEach(() => {
+    pageObjectIds.push(objects.length + 1);
+    contentObjectIds.push(objects.length + 2);
+
+    addObject("");
+    addObject("");
+  });
+
+  const fontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+
+  pages.forEach((pageLines, pageIndex) => {
+    const content = [
+      "BT",
+      "/F1 10 Tf",
+      "14 TL",
+      "40 790 Td",
+      ...pageLines.map((line) => `(${escapePdfText(line)}) Tj T*`),
+      "ET",
+    ].join("\n");
+
+    const contentId = contentObjectIds[pageIndex];
+    const pageId = pageObjectIds[pageIndex];
+
+    objects[contentId - 1] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+
+    objects[pageId - 1] =
+      `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 612 792] ` +
+      `/Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`;
+  });
+
+  objects[pagesId - 1] =
+    `<< /Type /Pages /Kids [${pageObjectIds
+      .map((id) => `${id} 0 R`)
+      .join(" ")}] /Count ${pageObjectIds.length} >>`;
+
+  let pdf = "%PDF-1.4\n";
+
+  objects.forEach((object, index) => {
+    offsets.push(pdf.length);
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+
+  const xrefOffset = pdf.length;
+
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += "0000000000 65535 f \n";
+
+  offsets.forEach((offset) => {
+    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+  });
+
+  pdf +=
+    `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\n` +
+    `startxref\n${xrefOffset}\n%%EOF`;
+
+  return new Blob([pdf], { type: "application/pdf" });
+}
+
+function downloadPdfFile({ fileName, title, rows, columns }) {
+  if (!rows.length) return false;
+
+  const blob = createPdfBlob({ title, rows, columns });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  return true;
 }
 
 export default function VendorsPage() {
@@ -74,8 +289,13 @@ export default function VendorsPage() {
   const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [selectedPayout, setSelectedPayout] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [feedback, setFeedback] = useState(null);
 
   const MotionDiv = m.div;
+
+  const showFeedback = (type, message) => {
+    setFeedback({ type, message });
+  };
 
   const filteredVendors = useMemo(() => {
     return filterVendors(overview.vendors, searchQuery, vendorStatusFilter);
@@ -123,6 +343,47 @@ export default function VendorsPage() {
   const pageStartIndex = (currentPage - 1) * VENDORS_PAGE_SIZE;
   const paginatedRows = paginateRows(activeRows, currentPage);
 
+  const handleExportPdf = () => {
+    try {
+      const config = EXPORT_CONFIG[activeTab] || EXPORT_CONFIG.vendors;
+
+      if (!activeRows.length) {
+        showFeedback("error", "No data available to export.");
+        return;
+      }
+
+      const downloaded = downloadPdfFile({
+        fileName: config.fileName,
+        title: config.title,
+        rows: activeRows,
+        columns: config.columns,
+      });
+
+      if (!downloaded) {
+        showFeedback("error", "No data available to export.");
+        return;
+      }
+
+      showFeedback("success", "PDF file downloaded successfully.");
+    } catch {
+      showFeedback("error", "Unable to export PDF. Please try again.");
+    }
+  };
+
+  const handleToggleVendorStatus = async (row) => {
+    const nextLabel = row.status === "active" ? "deactivated" : "activated";
+
+    try {
+      await toggleVendorRowStatus(row);
+      showFeedback("success", `${row.businessName} has been ${nextLabel}.`);
+    } catch {
+      showFeedback(
+        "error",
+        `Unable to update ${row.businessName}. Please try again.`
+      );
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -161,13 +422,22 @@ export default function VendorsPage() {
             action={
               <button
                 type="button"
-                className="inline-flex h-11 w-full items-center justify-center bg-[#E4B2B2] px-4 text-[14px] font-medium text-[#151210] transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#E4B2B2]/60 focus:ring-offset-2 sm:h-[46px] sm:w-auto sm:px-5 sm:text-[15px] lg:h-[52px] lg:text-[16px]"
+                onClick={handleExportPdf}
+                className="inline-flex h-10 w-full items-center justify-center bg-[#E4B2B2] px-4 text-[14px] font-medium text-[#151210] transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#E4B2B2]/60 focus:ring-offset-2 sm:w-auto sm:min-w-[116px]"
               >
                 Export PDF
               </button>
             }
           />
         </MotionDiv>
+
+        {feedback ? (
+          <InlineFeedback
+            type={feedback.type}
+            message={feedback.message}
+            onClose={() => setFeedback(null)}
+          />
+        ) : null}
 
         <MotionDiv
           initial={{ opacity: 0, y: 14 }}
@@ -258,7 +528,7 @@ export default function VendorsPage() {
               <VendorsTable
                 rows={paginatedRows}
                 startIndex={pageStartIndex}
-                onToggleStatus={toggleVendorRowStatus}
+                onToggleStatus={handleToggleVendorStatus}
               />
             ) : null}
 

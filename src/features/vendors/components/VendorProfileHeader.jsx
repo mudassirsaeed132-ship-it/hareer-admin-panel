@@ -30,7 +30,7 @@ export default function VendorProfileHeader({
         <button
           type="button"
           onClick={onToggleStatus}
-          className="inline-flex h-[44px] w-full items-center justify-center whitespace-nowrap border border-[#F04444] bg-white px-4 text-[15px] font-medium text-[#F04444] transition hover:bg-[#FFF5F5] sm:w-auto sm:min-w-[112px] sm:text-[16px]"
+          className="inline-flex h-10 w-full items-center justify-center whitespace-nowrap border border-[#F04444] bg-white px-4 text-[14px] font-medium text-[#F04444] transition hover:bg-[#FFF5F5] focus:outline-none focus:ring-2 focus:ring-[#F04444]/30 sm:w-auto sm:min-w-[112px]"
         >
           {isActive ? "Deactivate" : "Activate"}
         </button>

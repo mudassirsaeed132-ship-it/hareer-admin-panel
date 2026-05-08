@@ -16,27 +16,27 @@ export default function VendorsTable({
       {
         key: "serial",
         header: "Sr #",
-        width: "7%",
+        width: "6%",
         cell: (_row, index) => String(startIndex + index + 1).padStart(2, "0"),
-        headerClassName: "min-w-[70px] whitespace-nowrap",
-        cellClassName: "min-w-[70px] whitespace-nowrap font-semibold",
+        headerClassName: "min-w-[64px] whitespace-nowrap",
+        cellClassName: "min-w-[64px] whitespace-nowrap font-semibold",
       },
       {
         key: "vendorName",
         header: "Vendor Name",
-        width: "14%",
-        headerClassName: "min-w-[135px] whitespace-nowrap",
-        cellClassName: "min-w-[135px] whitespace-nowrap",
+        width: "13%",
+        headerClassName: "min-w-[130px] whitespace-nowrap",
+        cellClassName: "min-w-[130px] whitespace-nowrap",
       },
       {
         key: "businessName",
         header: "Business Name",
-        width: "18%",
+        width: "17%",
         headerClassName: "min-w-[170px] whitespace-nowrap",
         cellClassName: "min-w-[170px]",
         cell: (row) => (
-          <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 shrink-0 place-items-center bg-[#F4F1EE] text-[12px] font-semibold text-[#6F6965]">
+          <div className="flex min-w-max items-center gap-3">
+            <div className="grid h-8 w-8 shrink-0 place-items-center border border-[#EAE5E1] bg-[#FAF8F7] text-[12px] font-semibold text-[#6F6965]">
               {row.businessLogoLabel}
             </div>
             <span className="whitespace-nowrap">{row.businessName}</span>
@@ -46,42 +46,42 @@ export default function VendorsTable({
       {
         key: "category",
         header: "Category",
-        width: "12%",
+        width: "11%",
         headerClassName: "min-w-[120px] whitespace-nowrap",
         cellClassName: "min-w-[120px] whitespace-nowrap",
       },
       {
         key: "website",
         header: "Website",
-        width: "14%",
-        headerClassName: "min-w-[130px] whitespace-nowrap",
-        cellClassName: "min-w-[130px] whitespace-nowrap",
+        width: "13%",
+        headerClassName: "min-w-[135px] whitespace-nowrap",
+        cellClassName: "min-w-[135px] whitespace-nowrap",
       },
       {
         key: "location",
         header: "Location",
-        width: "15%",
-        headerClassName: "min-w-[145px] whitespace-nowrap",
-        cellClassName: "min-w-[145px] whitespace-nowrap",
+        width: "14%",
+        headerClassName: "min-w-[150px] whitespace-nowrap",
+        cellClassName: "min-w-[150px] whitespace-nowrap",
       },
       {
         key: "status",
         header: "Status",
         width: "10%",
-        headerClassName: "min-w-[118px] whitespace-nowrap",
-        cellClassName: "min-w-[118px]",
+        headerClassName: "min-w-[112px] whitespace-nowrap",
+        cellClassName: "min-w-[112px]",
         align: "center",
-        cell: (row) => <VendorStatusBadge status={row.status} size="lg" />,
+        cell: (row) => <VendorStatusBadge status={row.status} size="sm" />,
       },
       {
         key: "action",
         header: "Action",
-        width: "15%",
-        headerClassName: "min-w-[210px] whitespace-nowrap",
-        cellClassName: "min-w-[210px]",
+        width: "16%",
+        headerClassName: "min-w-[218px] whitespace-nowrap",
+        cellClassName: "min-w-[218px]",
         align: "center",
         cell: (row) => (
-          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+          <div className="flex min-w-max items-center justify-center gap-2 whitespace-nowrap">
             <TableCellPill
               as="button"
               type="button"
@@ -89,7 +89,7 @@ export default function VendorsTable({
               onClick={() => onToggleStatus(row)}
               className={
                 row.status === "active"
-                  ? "border border-[#F04444] bg-white text-[#F04444] transition hover:bg-[#FFF5F5]"
+                  ? "border border-[#FF4B55] bg-white text-[#FF1F2D] transition hover:bg-[#FFF5F5]"
                   : "bg-[#E4B2B2] text-[#151210] transition hover:opacity-90"
               }
             >
@@ -99,7 +99,7 @@ export default function VendorsTable({
             <TableCellPill
               as="button"
               type="button"
-              size="md"
+              size="sm"
               onClick={() => navigate(`/vendors/${row.id}`)}
               className="border border-[#E7E1DE] bg-[#F8F5F3] text-[#151210] transition hover:bg-[#F2EEEB]"
             >
@@ -117,7 +117,7 @@ export default function VendorsTable({
       columns={columns}
       rows={rows}
       rowKey={(row) => row.id}
-      minWidthClassName="min-w-[1120px]"
+      minWidthClassName="min-w-[1210px]"
       tableClassName="table-fixed"
     />
   );

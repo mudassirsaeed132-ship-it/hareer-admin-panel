@@ -5,6 +5,7 @@ export default function VendorProfileShell({
   detail,
   onBack,
   onToggleStatus,
+  onContactVendor,
 }) {
   return (
     <div className="space-y-4">
@@ -22,7 +23,10 @@ export default function VendorProfileShell({
           onToggleStatus={onToggleStatus}
         />
 
-        <VendorOwnerCard owner={detail.owner} />
+        <VendorOwnerCard
+          owner={detail.owner}
+          onContact={onContactVendor}
+        />
       </div>
     </div>
   );

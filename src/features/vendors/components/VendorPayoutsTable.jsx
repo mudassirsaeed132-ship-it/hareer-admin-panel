@@ -15,10 +15,10 @@ export default function VendorPayoutsTable({
       {
         key: "serial",
         header: "Sr #",
-        width: "7%",
+        width: "6%",
         cell: (_row, index) => String(startIndex + index + 1).padStart(2, "0"),
-        headerClassName: "min-w-[70px] whitespace-nowrap",
-        cellClassName: "min-w-[70px] whitespace-nowrap font-semibold",
+        headerClassName: "min-w-[64px] whitespace-nowrap",
+        cellClassName: "min-w-[64px] whitespace-nowrap font-semibold",
       },
       {
         key: "vendorName",
@@ -53,20 +53,20 @@ export default function VendorPayoutsTable({
         key: "status",
         header: "Status",
         width: "10%",
-        headerClassName: "min-w-[118px] whitespace-nowrap",
-        cellClassName: "min-w-[118px]",
+        headerClassName: "min-w-[124px] whitespace-nowrap",
+        cellClassName: "min-w-[124px]",
         align: "center",
         cell: (row) => <VendorStatusBadge status={row.status} size="lg" />,
       },
       {
         key: "action",
         header: "Action",
-        width: "25%",
-        headerClassName: "min-w-[310px] whitespace-nowrap",
-        cellClassName: "min-w-[310px]",
-        align: "center",
+        width: "28%",
+        headerClassName: "min-w-[340px] whitespace-nowrap text-left",
+        cellClassName: "min-w-[340px]",
+        align: "left",
         cell: (row) => (
-          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+          <div className="flex min-w-max items-center justify-start gap-2 whitespace-nowrap">
             <TableCellPill
               as="button"
               type="button"
@@ -109,7 +109,7 @@ export default function VendorPayoutsTable({
       columns={columns}
       rows={rows}
       rowKey={(row) => row.id}
-      minWidthClassName="min-w-[1220px]"
+      minWidthClassName="min-w-[1260px]"
       tableClassName="table-fixed"
     />
   );

@@ -99,7 +99,7 @@ export default function DashboardMetrics({ metrics = [], items = [], stats = [] 
       {cards.map((metric) => (
         <article
           key={metric.id || metric.key || metric.label || metric.title}
-          className="min-h-[126px] border border-[#E7E1DE] bg-white px-5 py-5"
+          className="min-h-31.5 border border-[#E7E1DE] bg-white px-5 py-5"
         >
           <div className="mb-6 flex items-center">
             <DashboardMetricIcon metric={metric} />

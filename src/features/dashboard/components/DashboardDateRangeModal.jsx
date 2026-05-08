@@ -4,7 +4,7 @@ import Modal from "../../../shared/ui/Modal";
 function FieldCard({ id, label, error, children }) {
   return (
     <div>
-      <div className="rounded-[8px] bg-[#FAF8F7] px-3 py-3">
+      <div className="rounded-lg bg-[#FAF8F7] px-3 py-3">
         <label
           htmlFor={id}
           className="block text-[12px] leading-none text-[#7E7671]"
@@ -97,7 +97,7 @@ export default function DashboardDateRangeModal({
               onChange={handleChange(setDraftStartDate)}
               aria-invalid={Boolean(error)}
               aria-describedby={error ? "dashboard-date-range-error" : undefined}
-              className="h-[28px] w-full border-none bg-transparent p-0 text-[15px] text-[#151210] outline-none [color-scheme:light]"
+              className="h-7 w-full border-none bg-transparent p-0 text-[15px] text-[#151210] outline-none scheme-light"
             />
           </FieldCard>
 
@@ -109,7 +109,7 @@ export default function DashboardDateRangeModal({
               onChange={handleChange(setDraftEndDate)}
               aria-invalid={Boolean(error)}
               aria-describedby={error ? "dashboard-date-range-error" : undefined}
-              className="h-[28px] w-full border-none bg-transparent p-0 text-[15px] text-[#151210] outline-none [color-scheme:light]"
+              className="h-7 w-full border-none bg-transparent p-0 text-[15px] text-[#151210] outline-none scheme-light"
             />
           </FieldCard>
         </div>
@@ -124,14 +124,14 @@ export default function DashboardDateRangeModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-[50px] items-center justify-center rounded-[8px] border border-[#E7E1DE] bg-white px-4 text-[16px] font-medium text-[#151210] transition hover:bg-[#FCFAF9]"
+            className="inline-flex h-12.5 items-center justify-center rounded-lg border border-[#E7E1DE] bg-white px-4 text-[16px] font-medium text-[#151210] transition hover:bg-[#FCFAF9]"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="inline-flex h-[50px] items-center justify-center rounded-[8px] bg-[#E4B2B2] px-4 text-[16px] font-medium text-[#151210] transition hover:opacity-90"
+            className="inline-flex h-12.5 items-center justify-center rounded-lg bg-[#E4B2B2] px-4 text-[16px] font-medium text-[#151210] transition hover:opacity-90"
           >
             Apply
           </button>

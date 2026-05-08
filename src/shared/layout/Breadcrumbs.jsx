@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronsRight } from "lucide-react";
 import { getBreadcrumbs } from "../../app/config/breadcrumbs.config";
 import { cn } from "../lib/cn";
 
@@ -14,27 +14,31 @@ export default function Breadcrumbs() {
       aria-label="Breadcrumb"
       className="flex min-w-0 max-w-full items-center overflow-hidden"
     >
-      <ol className="flex min-w-0 max-w-full items-center gap-1 overflow-hidden">
+      <ol className="flex min-w-0 max-w-full items-center overflow-hidden">
         {breadcrumbs.map((item, index) => {
           const isLast = item.isActive || index === breadcrumbs.length - 1;
 
           return (
             <li
               key={`${item.href}-${item.label}`}
-              className="flex min-w-0 items-center gap-1"
+              className="flex min-w-0 items-center"
             >
-              {index > 0 && (
-                <ChevronRight
+              {index > 0 ? (
+                <span
                   aria-hidden="true"
-                  className="h-4 w-4 shrink-0 text-[#2D2926] sm:h-[18px] sm:w-[18px]"
-                  strokeWidth={2}
-                />
-              )}
+                  className="mx-2 inline-flex h-[18px] w-[22px] shrink-0 items-center justify-center"
+                >
+                  <ChevronsRight
+                    className="h-[18px] w-[18px] text-[#6F6A67]"
+                    strokeWidth={2.4}
+                  />
+                </span>
+              ) : null}
 
               {isLast ? (
                 <span
                   className={cn(
-                    "block truncate text-[14px] font-medium text-[#E3B2B2]",
+                    "block truncate text-[14px] font-medium leading-none text-[#E3B2B2]",
                     "sm:text-[15px] xl:text-[16px]"
                   )}
                   title={item.label}
@@ -45,7 +49,7 @@ export default function Breadcrumbs() {
                 <Link
                   to={item.href}
                   className={cn(
-                    "block truncate text-[14px] font-medium text-[#6F6A67] transition-colors",
+                    "block truncate text-[14px] font-medium leading-none text-[#6F6A67] transition-colors",
                     "hover:text-[#E3B2B2] sm:text-[15px] xl:text-[16px]"
                   )}
                   title={item.label}

@@ -14,7 +14,7 @@ export default function Drawer({
   children,
   footer,
   widthClassName = "sm:max-w-[430px] lg:max-w-[450px]",
-  titleClassName = "font-serif text-[24px] leading-none text-[#151210]",
+  titleClassName = "font-serif text-[22px] leading-tight text-[#151210] sm:text-[24px]",
   bodyClassName = "",
   closeOnOverlayClick = true,
   closeOnEscape = true,
@@ -71,15 +71,19 @@ export default function Drawer({
               role="dialog"
               aria-modal="true"
               aria-label={typeof title === "string" ? title : "Drawer"}
-              className={`fixed right-0 top-0 z-50 h-screen w-full overflow-y-auto shadow-[0_12px_48px_rgba(22,18,16,0.12)] ${widthClassName} ${contentClassName}`}
+              className={[
+                "fixed inset-y-0 right-0 z-50 flex h-[100dvh] w-full flex-col overflow-hidden shadow-[0_12px_48px_rgba(22,18,16,0.12)]",
+                widthClassName,
+                contentClassName,
+              ].join(" ")}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={transition}
             >
-              <div className={`min-h-full p-4 sm:p-5 ${bodyClassName}`}>
+              <div className={`flex min-h-0 flex-1 flex-col ${bodyClassName}`}>
                 {(title || showCloseButton) && (
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#E7E1DE] px-4 py-4 sm:px-5">
                     <div className="min-w-0">
                       {typeof title === "string" ? (
                         <h2 className={titleClassName}>{title}</h2>
@@ -93,7 +97,7 @@ export default function Drawer({
                         type="button"
                         onClick={onClose}
                         aria-label={closeButtonLabel}
-                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E7E1DE] text-[16px] text-[#151210] transition hover:bg-[#F8F5F3]"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E7E1DE] text-[16px] text-[#151210] transition hover:bg-[#F8F5F3] focus:outline-none focus:ring-2 focus:ring-[#E4B2B2]/60"
                       >
                         <X className="h-4 w-4" strokeWidth={1.8} />
                       </button>
@@ -101,9 +105,15 @@ export default function Drawer({
                   </div>
                 )}
 
-                <div className="mt-5 space-y-3">{children}</div>
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+                  <div className="space-y-3">{children}</div>
+                </div>
 
-                {footer ? <div className="mt-4">{footer}</div> : null}
+                {footer ? (
+                  <div className="shrink-0 border-t border-[#E7E1DE] bg-white px-4 py-4 sm:px-5">
+                    {footer}
+                  </div>
+                ) : null}
               </div>
             </MotionAside>
           </>

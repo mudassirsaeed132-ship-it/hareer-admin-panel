@@ -18,7 +18,7 @@ export default function TablePagination({
   };
 
   return (
-    <div className="flex flex-col gap-3 border-t border-[#E7E1DE] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 border-t border-[#E7E1DE] bg-white px-3 py-4 sm:px-4 md:flex-row md:items-center md:justify-between">
       <p className="text-[13px] text-[#7E7671]">
         Showing{" "}
         <span className="font-medium text-[#151210]">{startItem}</span>
@@ -28,17 +28,17 @@ export default function TablePagination({
         <span className="font-medium text-[#151210]">{totalItems}</span>
       </p>
 
-      <div className="flex items-center gap-2">
+      <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-2 sm:w-auto">
         <button
           type="button"
           onClick={goToPrevious}
           disabled={currentPage === 1}
-          className="inline-flex h-9 items-center justify-center border border-[#E7E1DE] bg-[#F8F5F3] px-4 text-[13px] font-medium text-[#151210] transition hover:bg-[#F2EEEB] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 items-center justify-center border border-[#E7E1DE] bg-[#F8F5F3] px-3 text-[13px] font-medium text-[#151210] transition hover:bg-[#F2EEEB] disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
         >
           Previous
         </button>
 
-        <div className="inline-flex h-9 min-w-9 items-center justify-center border border-[#E7E1DE] bg-white px-3 text-[13px] font-medium text-[#151210]">
+        <div className="inline-flex h-9 min-w-10 items-center justify-center border border-[#E7E1DE] bg-white px-3 text-[13px] font-medium text-[#151210]">
           {currentPage} / {totalPages}
         </div>
 
@@ -46,7 +46,7 @@ export default function TablePagination({
           type="button"
           onClick={goToNext}
           disabled={currentPage === totalPages}
-          className="inline-flex h-9 items-center justify-center border border-[#E7E1DE] bg-[#F8F5F3] px-4 text-[13px] font-medium text-[#151210] transition hover:bg-[#F2EEEB] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 items-center justify-center border border-[#E7E1DE] bg-[#F8F5F3] px-3 text-[13px] font-medium text-[#151210] transition hover:bg-[#F2EEEB] disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
         >
           Next
         </button>

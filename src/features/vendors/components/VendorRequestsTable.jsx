@@ -14,26 +14,26 @@ export default function VendorRequestsTable({
       {
         key: "serial",
         header: "Sr #",
-        width: "7%",
+        width: "6%",
         cell: (_row, index) => String(startIndex + index + 1).padStart(2, "0"),
-        headerClassName: "min-w-[70px] whitespace-nowrap",
-        cellClassName: "min-w-[70px] whitespace-nowrap font-semibold",
+        headerClassName: "min-w-[64px] whitespace-nowrap",
+        cellClassName: "min-w-[64px] whitespace-nowrap font-semibold",
       },
       {
         key: "vendorName",
         header: "Vendor Name",
-        width: "14%",
-        headerClassName: "min-w-[135px] whitespace-nowrap",
-        cellClassName: "min-w-[135px] whitespace-nowrap",
+        width: "13%",
+        headerClassName: "min-w-[130px] whitespace-nowrap",
+        cellClassName: "min-w-[130px] whitespace-nowrap",
       },
       {
         key: "businessName",
         header: "Business Name",
-        width: "18%",
+        width: "17%",
         headerClassName: "min-w-[170px] whitespace-nowrap",
         cellClassName: "min-w-[170px]",
         cell: (row) => (
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-max items-center gap-3">
             <div className="grid h-8 w-8 shrink-0 place-items-center bg-[#F4F1EE] text-[12px] font-semibold text-[#6F6965]">
               {row.businessLogoLabel}
             </div>
@@ -44,42 +44,42 @@ export default function VendorRequestsTable({
       {
         key: "category",
         header: "Category",
-        width: "12%",
+        width: "11%",
         headerClassName: "min-w-[120px] whitespace-nowrap",
         cellClassName: "min-w-[120px] whitespace-nowrap",
       },
       {
         key: "website",
         header: "Website",
-        width: "14%",
-        headerClassName: "min-w-[130px] whitespace-nowrap",
-        cellClassName: "min-w-[130px] whitespace-nowrap",
+        width: "13%",
+        headerClassName: "min-w-[135px] whitespace-nowrap",
+        cellClassName: "min-w-[135px] whitespace-nowrap",
       },
       {
         key: "location",
         header: "Location",
-        width: "15%",
-        headerClassName: "min-w-[145px] whitespace-nowrap",
-        cellClassName: "min-w-[145px] whitespace-nowrap",
+        width: "14%",
+        headerClassName: "min-w-[150px] whitespace-nowrap",
+        cellClassName: "min-w-[150px] whitespace-nowrap",
       },
       {
         key: "status",
         header: "Status",
         width: "10%",
-        headerClassName: "min-w-[118px] whitespace-nowrap",
-        cellClassName: "min-w-[118px]",
+        headerClassName: "min-w-[124px] whitespace-nowrap",
+        cellClassName: "min-w-[124px]",
         align: "center",
         cell: (row) => <VendorStatusBadge status={row.status} size="lg" />,
       },
       {
         key: "action",
         header: "Action",
-        width: "14%",
-        headerClassName: "min-w-[180px] whitespace-nowrap",
-        cellClassName: "min-w-[180px]",
+        width: "16%",
+        headerClassName: "min-w-[200px] whitespace-nowrap",
+        cellClassName: "min-w-[200px]",
         align: "center",
         cell: (row) => (
-          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+          <div className="flex min-w-max items-center justify-center gap-2 whitespace-nowrap">
             <TableCellPill
               as="button"
               type="button"
@@ -111,7 +111,7 @@ export default function VendorRequestsTable({
       columns={columns}
       rows={rows}
       rowKey={(row) => row.id}
-      minWidthClassName="min-w-[1120px]"
+      minWidthClassName="min-w-[1230px]"
       tableClassName="table-fixed"
     />
   );

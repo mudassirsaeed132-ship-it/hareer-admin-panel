@@ -37,34 +37,34 @@ export const PAYMENT_TERMS_OPTIONS = [
 export const STATUS_META = {
   active: {
     label: "Active",
-    className: "bg-[#E7F5EC] text-[#2FB065]",
+    className: "border border-[#D9F0E0] bg-[#EAF8EF] text-[#18A957]",
   },
   deactivated: {
     label: "Deactivated",
-    className: "bg-[#FDEAEA] text-[#F04444]",
+    className: "border border-[#F8D7D7] bg-[#FFF0F0] text-[#F04444]",
   },
   pending: {
     label: "Pending",
-    className: "bg-[#FDEAEA] text-[#F04444]",
+    className: "border border-[#F8D7D7] bg-[#FFF0F0] text-[#F04444]",
   },
   paid: {
     label: "Paid",
-    className: "bg-[#E7F5EC] text-[#2FB065]",
+    className: "border border-[#D9F0E0] bg-[#EAF8EF] text-[#18A957]",
   },
   "in-progress": {
     label: "In Progress",
-    className: "bg-[#FFF3F0] text-[#E3B1B1]",
+    className: "border border-[#F6E6E4] bg-[#FFF3F0] text-[#E3B1B1]",
   },
   accepted: {
     label: "Accepted",
-    className: "bg-[#E7F5EC] text-[#2FB065]",
+    className: "border border-[#D9F0E0] bg-[#EAF8EF] text-[#18A957]",
   },
   "on-the-way": {
     label: "On the way",
-    className: "bg-[#EAF2FF] text-[#3E7BFA]",
+    className: "border border-[#DCE8FF] bg-[#EAF2FF] text-[#3E7BFA]",
   },
   delivered: {
     label: "Delivered",
-    className: "bg-[#FAF1F1] text-[#E3B1B1]",
+    className: "border border-[#F6E6E4] bg-[#FAF1F1] text-[#E3B1B1]",
   },
 };

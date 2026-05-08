@@ -7,6 +7,7 @@ import PageSection from "../../../shared/ui/PageSection";
 import EmptyState from "../../../shared/ui/EmptyState";
 import Skeleton from "../../../shared/ui/Skeleton";
 import TablePagination from "../../../shared/ui/TablePagination";
+import InlineFeedback from "../../../shared/ui/InlineFeedback";
 import VendorsTabs from "../components/VendorsTabs";
 import VendorProfileShell from "../components/VendorProfileShell";
 import VendorMetricsCards from "../components/VendorMetricsCards";
@@ -75,6 +76,11 @@ export default function VendorDetailsPage() {
   const [productsQuery, setProductsQuery] = useState("");
   const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [feedback, setFeedback] = useState(null);
+
+  const showFeedback = (type, message) => {
+    setFeedback({ type, message });
+  };
 
   const filteredOrders = useMemo(() => {
     return filterVendorOrders(detail?.orders ?? [], ordersQuery, ordersStatus);
@@ -101,6 +107,29 @@ export default function VendorDetailsPage() {
   );
   const pageStartIndex = (currentPage - 1) * VENDOR_DETAILS_PAGE_SIZE;
   const paginatedRows = paginateRows(activeRows, currentPage);
+
+  const handleToggleVendorStatus = async () => {
+    const nextLabel = detail?.status === "active" ? "deactivated" : "activated";
+
+    try {
+      await toggleVendorStatusForDetail();
+      showFeedback("success", `${detail.businessName} has been ${nextLabel}.`);
+    } catch {
+      showFeedback(
+        "error",
+        `Unable to update ${detail.businessName}. Please try again.`
+      );
+    }
+  };
+
+  const handleContactVendor = () => {
+    if (detail?.owner?.email) {
+      window.location.href = `mailto:${detail.owner.email}`;
+      return;
+    }
+
+    showFeedback("error", "Vendor contact email is not available.");
+  };
 
   useEffect(() => {
     setCurrentPage(1);
@@ -136,9 +165,18 @@ export default function VendorDetailsPage() {
           <VendorProfileShell
             detail={detail}
             onBack={() => navigate("/vendors")}
-            onToggleStatus={toggleVendorStatusForDetail}
+            onToggleStatus={handleToggleVendorStatus}
+            onContactVendor={handleContactVendor}
           />
         </MotionDiv>
+
+        {feedback ? (
+          <InlineFeedback
+            type={feedback.type}
+            message={feedback.message}
+            onClose={() => setFeedback(null)}
+          />
+        ) : null}
 
         <MotionDiv
           initial={{ opacity: 0, y: 14 }}
