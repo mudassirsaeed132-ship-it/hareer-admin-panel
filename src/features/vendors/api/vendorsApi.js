@@ -38,15 +38,25 @@ function clampRate(value) {
 }
 
 // Sale-based commission: rate is a % of the vendor's gross sales for the period.
-function computePayoutCommission(totalSales, rate) {
+// Additional cost is a second agreed % deduction; net payout = sales − commission − additional cost.
+// deliveryFees ([{ fee, radius }]) are captured per vendor but not (yet) deducted from the payout.
+function computePayoutCommission(
+  totalSales,
+  { commissionRate, additionalCostPercent, deliveryFees } = {}
+) {
   const sales = Number(totalSales) || 0;
-  const commissionRate = clampRate(rate);
-  const commissionAmount = Math.round((sales * commissionRate) / 100);
+  const rate = clampRate(commissionRate);
+  const additionalRate = clampRate(additionalCostPercent);
+  const commissionAmount = Math.round((sales * rate) / 100);
+  const additionalCostAmount = Math.round((sales * additionalRate) / 100);
 
   return {
-    commissionRate,
+    commissionRate: rate,
     commissionAmount,
-    netPayout: sales - commissionAmount,
+    additionalCostPercent: additionalRate,
+    additionalCostAmount,
+    deliveryFees: Array.isArray(deliveryFees) ? deliveryFees : [],
+    netPayout: sales - commissionAmount - additionalCostAmount,
   };
 }
 
@@ -186,17 +196,24 @@ export async function saveVendorCommissionSettings(payoutId, payload) {
 
   const { vendorId } = payout;
   const commissionRate = clampRate(payload?.commissionRate);
+  const additionalCostPercent = clampRate(payload?.additionalCostPercent);
+  const deliveryFees = Array.isArray(payload?.deliveryFees) ? payload.deliveryFees : [];
+  const settings = { commissionRate, additionalCostPercent, deliveryFees };
 
   const vendorIndex = overviewDb.vendors.findIndex((item) => item.id === vendorId);
   if (vendorIndex >= 0) {
     overviewDb.vendors[vendorIndex] = {
       ...overviewDb.vendors[vendorIndex],
       commissionRate,
+      additionalCostPercent,
+      deliveryFees,
     };
   }
 
   if (detailDb[vendorId]) {
     detailDb[vendorId].commissionRate = commissionRate;
+    detailDb[vendorId].additionalCostPercent = additionalCostPercent;
+    detailDb[vendorId].deliveryFees = deliveryFees;
   }
 
   overviewDb.payouts = overviewDb.payouts.map((item) => {
@@ -204,12 +221,14 @@ export async function saveVendorCommissionSettings(payoutId, payload) {
       return item;
     }
 
-    return { ...item, ...computePayoutCommission(item.totalSales, commissionRate) };
+    return { ...item, ...computePayoutCommission(item.totalSales, settings) };
   });
 
   return {
     vendorId,
     commissionRate,
+    additionalCostPercent,
+    deliveryFees,
     payouts: deepClone(overviewDb.payouts),
   };
 }

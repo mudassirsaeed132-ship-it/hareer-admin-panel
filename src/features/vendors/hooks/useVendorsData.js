@@ -142,7 +142,12 @@ export default function useVendorsData() {
         ...previous,
         vendors: previous.vendors.map((item) =>
           item.id === result.vendorId
-            ? { ...item, commissionRate: result.commissionRate }
+            ? {
+                ...item,
+                commissionRate: result.commissionRate,
+                additionalCostPercent: result.additionalCostPercent,
+                deliveryFees: result.deliveryFees,
+              }
             : item
         ),
         payouts: Array.isArray(result.payouts) ? result.payouts : previous.payouts,

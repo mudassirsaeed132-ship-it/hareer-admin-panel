@@ -23,44 +23,44 @@ export default function VendorPayoutsTable({
         header: "Sr #",
         width: "5%",
         cell: (_row, index) => String(startIndex + index + 1).padStart(2, "0"),
-        headerClassName: "min-w-[56px] whitespace-nowrap",
-        cellClassName: "min-w-[56px] whitespace-nowrap font-semibold",
+        headerClassName: "min-w-[50px] whitespace-nowrap",
+        cellClassName: "min-w-[50px] whitespace-nowrap font-semibold",
       },
       {
         key: "vendorName",
         header: "Vendor",
         width: "13%",
-        headerClassName: "min-w-[150px] whitespace-nowrap",
-        cellClassName: "min-w-[150px] whitespace-nowrap",
+        headerClassName: "min-w-[140px] whitespace-nowrap",
+        cellClassName: "min-w-[140px] whitespace-nowrap",
       },
       {
         key: "ownerName",
         header: "Owner Name",
         width: "11%",
-        headerClassName: "min-w-[130px] whitespace-nowrap",
-        cellClassName: "min-w-[130px] whitespace-nowrap",
+        headerClassName: "min-w-[120px] whitespace-nowrap",
+        cellClassName: "min-w-[120px] whitespace-nowrap",
       },
       {
         key: "month",
         header: "Month",
         width: "11%",
-        headerClassName: "min-w-[130px] whitespace-nowrap",
-        cellClassName: "min-w-[130px] whitespace-nowrap",
+        headerClassName: "min-w-[112px] whitespace-nowrap",
+        cellClassName: "min-w-[112px] whitespace-nowrap",
       },
       {
         key: "totalSales",
         header: "Total Sales",
         width: "11%",
         cell: (row) => formatCurrency(row.totalSales, row.currency),
-        headerClassName: "min-w-[120px] whitespace-nowrap",
-        cellClassName: "min-w-[120px] whitespace-nowrap",
+        headerClassName: "min-w-[108px] whitespace-nowrap",
+        cellClassName: "min-w-[108px] whitespace-nowrap",
       },
       {
         key: "commission",
         header: "Commission",
         width: "12%",
-        headerClassName: "min-w-[130px] whitespace-nowrap",
-        cellClassName: "min-w-[130px] whitespace-nowrap",
+        headerClassName: "min-w-[116px] whitespace-nowrap",
+        cellClassName: "min-w-[116px] whitespace-nowrap",
         cell: (row) => (
           <div className="leading-tight">
             <div className="font-medium text-[#151210]">
@@ -76,16 +76,16 @@ export default function VendorPayoutsTable({
         key: "netPayout",
         header: "Net Payout",
         width: "11%",
-        headerClassName: "min-w-[120px] whitespace-nowrap",
-        cellClassName: "min-w-[120px] whitespace-nowrap font-semibold text-[#151210]",
+        headerClassName: "min-w-[108px] whitespace-nowrap",
+        cellClassName: "min-w-[108px] whitespace-nowrap font-semibold text-[#151210]",
         cell: (row) => formatCurrency(getNetPayout(row), row.currency),
       },
       {
         key: "status",
         header: "Status",
         width: "8%",
-        headerClassName: "min-w-[118px] whitespace-nowrap",
-        cellClassName: "min-w-[118px]",
+        headerClassName: "min-w-[104px] whitespace-nowrap",
+        cellClassName: "min-w-[104px]",
         align: "center",
         cell: (row) => <VendorStatusBadge status={row.status} size="lg" />,
       },
@@ -93,8 +93,8 @@ export default function VendorPayoutsTable({
         key: "action",
         header: "Action",
         width: "18%",
-        headerClassName: "min-w-[320px] whitespace-nowrap text-left",
-        cellClassName: "min-w-[320px]",
+        headerClassName: "min-w-[300px] whitespace-nowrap text-left",
+        cellClassName: "min-w-[300px]",
         align: "left",
         cell: (row) => (
           <div className="flex min-w-max items-center justify-start gap-2 whitespace-nowrap">
@@ -151,8 +151,7 @@ export default function VendorPayoutsTable({
       columns={columns}
       rows={rows}
       rowKey={(row) => row.id}
-      minWidthClassName="min-w-[1560px]"
-      tableClassName="table-fixed"
+      minWidthClassName="min-w-[1040px]"
     />
   );
 }

@@ -1,22 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, X } from "lucide-react";
 import Modal from "@/shared/ui/Modal";
 import { formatCurrency } from "@/shared/lib/formatCurrency";
+import { clampRate, isValidPercent } from "@/shared/lib/commission";
+import {
+  CommissionField,
+  CommissionSummaryRow,
+  commissionInputClassName,
+} from "@/shared/ui/CommissionFields";
 
-function FieldCard({ label, children }) {
-  return (
-    <div className="bg-[#FAF8F7] p-4">
-      <label className="block text-[13px] leading-none text-[#7E7671]">
-        {label}
-      </label>
-      <div className="mt-3">{children}</div>
-    </div>
-  );
+const RADIUS_OPTIONS = [
+  { value: "1", label: "1km" },
+  { value: "3", label: "3km" },
+  { value: "5", label: "5km" },
+  { value: "10", label: "10km" },
+  { value: "15", label: "15km" },
+  { value: "20", label: "20km" },
+];
+
+function makeDeliveryRow() {
+  return { fee: "5", radius: "5" };
 }
 
-function clampRate(value) {
-  const rate = Number(value);
-  if (!Number.isFinite(rate)) return 0;
-  return Math.min(100, Math.max(0, rate));
+function normalizeDeliveryFees(payout) {
+  if (Array.isArray(payout?.deliveryFees) && payout.deliveryFees.length) {
+    return payout.deliveryFees.map((row) => ({
+      fee: String(row.fee ?? ""),
+      radius: String(row.radius ?? "5"),
+    }));
+  }
+  return [makeDeliveryRow()];
 }
 
 export default function CommissionSettingsModal({
@@ -27,37 +40,66 @@ export default function CommissionSettingsModal({
   submitting = false,
 }) {
   const [commissionRate, setCommissionRate] = useState("10");
+  const [additionalCostPercent, setAdditionalCostPercent] = useState("5");
+  const [deliveryFees, setDeliveryFees] = useState([makeDeliveryRow()]);
 
   useEffect(() => {
     if (!open || !payout) return;
     setCommissionRate(String(payout.commissionRate ?? 10));
+    setAdditionalCostPercent(String(payout.additionalCostPercent ?? 5));
+    setDeliveryFees(normalizeDeliveryFees(payout));
   }, [open, payout]);
 
   const totals = useMemo(() => {
     const salesAmount = Number(payout?.totalSales ?? 0);
     const currency = payout?.currency ?? "LYD";
-    const rate = clampRate(commissionRate);
-    const commissionAmount = Math.round((salesAmount * rate) / 100);
+    const commissionAmount = Math.round((salesAmount * clampRate(commissionRate)) / 100);
+    const additionalCostAmount = Math.round(
+      (salesAmount * clampRate(additionalCostPercent)) / 100
+    );
 
-    return {
-      salesAmount,
-      commissionAmount,
-      netPayout: salesAmount - commissionAmount,
-      currency,
-    };
-  }, [commissionRate, payout]);
+    return { salesAmount, currency, commissionAmount, additionalCostAmount };
+  }, [commissionRate, additionalCostPercent, payout]);
 
-  const rateIsValid =
-    commissionRate !== "" &&
-    Number.isFinite(Number(commissionRate)) &&
-    Number(commissionRate) >= 0 &&
-    Number(commissionRate) <= 100;
+  const updateDeliveryRow = (index, key, value) => {
+    setDeliveryFees((rows) =>
+      rows.map((row, i) => (i === index ? { ...row, [key]: value } : row))
+    );
+  };
+
+  const addDeliveryRow = () => {
+    setDeliveryFees((rows) => [...rows, makeDeliveryRow()]);
+  };
+
+  const removeDeliveryRow = (index) => {
+    setDeliveryFees((rows) =>
+      rows.length > 1 ? rows.filter((_, i) => i !== index) : rows
+    );
+  };
+
+  const canSubmit =
+    isValidPercent(commissionRate) &&
+    isValidPercent(additionalCostPercent, { allowEmpty: true }) &&
+    !submitting;
+
+  const handleReset = () => {
+    setCommissionRate(String(payout?.commissionRate ?? 10));
+    setAdditionalCostPercent(String(payout?.additionalCostPercent ?? 5));
+    setDeliveryFees(normalizeDeliveryFees(payout));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!rateIsValid) return;
+    if (!canSubmit) return;
 
-    await onSubmit?.({ commissionRate: clampRate(commissionRate) });
+    await onSubmit?.({
+      commissionRate: clampRate(commissionRate),
+      additionalCostPercent: clampRate(additionalCostPercent),
+      deliveryFees: deliveryFees.map((row) => ({
+        fee: clampRate(row.fee),
+        radius: Number(row.radius) || 0,
+      })),
+    });
   };
 
   return (
@@ -65,11 +107,7 @@ export default function CommissionSettingsModal({
       open={open}
       onClose={onClose}
       title="Commission Settings"
-      subtitle={
-        payout?.vendorName
-          ? `Set the commission rate for ${payout.vendorName}. It applies to all of this vendor's unpaid payouts.`
-          : "Set the vendor's commission rate. It applies to all of their unpaid payouts."
-      }
+      subtitle="Manually calculate vendor payouts and your commission based on agreed terms."
       maxWidthClassName="max-w-[476px]"
       panelClassName="bg-white"
       bodyClassName="bg-white"
@@ -78,13 +116,13 @@ export default function CommissionSettingsModal({
       showCloseButton={false}
     >
       <form onSubmit={handleSubmit} className="space-y-3">
-        <FieldCard label="Total Sales Amount">
+        <CommissionField label="Total Sales Amount">
           <div className="text-[16px] font-medium text-[#151210]">
             {formatCurrency(totals.salesAmount, totals.currency)}
           </div>
-        </FieldCard>
+        </CommissionField>
 
-        <FieldCard label="Commission Rate (%)">
+        <CommissionField label="Commission Rate (%)">
           <input
             type="number"
             min="0"
@@ -92,44 +130,112 @@ export default function CommissionSettingsModal({
             step="0.1"
             value={commissionRate}
             onChange={(event) => setCommissionRate(event.target.value)}
-            className="w-full border-none bg-transparent p-0 text-[16px] text-[#151210] outline-none"
+            className={commissionInputClassName}
           />
-        </FieldCard>
+        </CommissionField>
 
-        {!rateIsValid ? (
-          <p className="text-[13px] leading-none text-[#F04444]">
-            Enter a commission rate between 0 and 100.
-          </p>
-        ) : null}
+        <CommissionField label="Additional Costs (Optional)">
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            value={additionalCostPercent}
+            onChange={(event) => setAdditionalCostPercent(event.target.value)}
+            className={commissionInputClassName}
+          />
+        </CommissionField>
 
-        <div className="border-t border-[#E7E1DE] pt-4">
-          <div className="flex items-center justify-between gap-4 py-1 text-[16px] text-[#6F6965]">
-            <span>Sales Amount</span>
-            <span className="font-medium text-[#151210]">
-              {formatCurrency(totals.salesAmount, totals.currency)}
-            </span>
+        <div>
+          <h3 className="text-[18px] font-semibold leading-none text-[#151210]">
+            Delivery Fees
+          </h3>
+
+          <div className="mt-3 space-y-2">
+            {deliveryFees.map((row, index) => (
+              <div key={index} className="relative">
+                <div className="grid grid-cols-2 gap-2">
+                  <CommissionField label="Delivery Fees">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={row.fee}
+                      onChange={(event) =>
+                        updateDeliveryRow(index, "fee", event.target.value)
+                      }
+                      className={commissionInputClassName}
+                    />
+                  </CommissionField>
+
+                  <CommissionField label="Radius">
+                    <div className="relative">
+                      <select
+                        value={row.radius}
+                        onChange={(event) =>
+                          updateDeliveryRow(index, "radius", event.target.value)
+                        }
+                        className={`${commissionInputClassName} appearance-none pr-6`}
+                      >
+                        {RADIUS_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        size={16}
+                        className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[#7E7671]"
+                      />
+                    </div>
+                  </CommissionField>
+                </div>
+
+                {deliveryFees.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => removeDeliveryRow(index)}
+                    aria-label="Remove delivery fee"
+                    className="absolute -right-1 -top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#E7E1DE] bg-white text-[#7E7671] transition hover:bg-[#FAF7F5]"
+                  >
+                    <X size={12} />
+                  </button>
+                ) : null}
+              </div>
+            ))}
           </div>
-          <div className="flex items-center justify-between gap-4 py-1 text-[16px] text-[#6F6965]">
-            <span>Commission ({clampRate(commissionRate)}%)</span>
-            <span className="font-medium text-[#151210]">
-              − {formatCurrency(totals.commissionAmount, totals.currency)}
-            </span>
+
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={addDeliveryRow}
+              className="text-[14px] font-medium text-[#E4B2B2] transition hover:opacity-80"
+            >
+              + Add more
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 bg-[#FAF3F3] px-4 py-3">
-          <span className="text-[15px] font-medium text-[#151210]">
-            Net Payout to Vendor
-          </span>
-          <span className="text-[18px] font-semibold text-[#151210]">
-            {formatCurrency(totals.netPayout, totals.currency)}
-          </span>
+        <div className="border-t border-[#E7E1DE] pt-4">
+          <CommissionSummaryRow
+            label="Sales Amount"
+            value={formatCurrency(totals.salesAmount, totals.currency)}
+          />
+          <CommissionSummaryRow
+            label="Commission Rate"
+            value={`${formatCurrency(totals.commissionAmount, totals.currency)} (${clampRate(commissionRate)}%)`}
+          />
+          <CommissionSummaryRow
+            label="Additional Cost"
+            value={`${formatCurrency(totals.additionalCostAmount, totals.currency)} (${clampRate(additionalCostPercent)}%)`}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => setCommissionRate(String(payout?.commissionRate ?? 10))}
+            onClick={handleReset}
             className="inline-flex h-[50px] items-center justify-center border border-[#E7E1DE] bg-white px-4 text-[16px] font-medium text-[#151210]"
           >
             Reset
@@ -137,7 +243,7 @@ export default function CommissionSettingsModal({
 
           <button
             type="submit"
-            disabled={submitting || !rateIsValid}
+            disabled={!canSubmit}
             className="inline-flex h-[50px] items-center justify-center bg-[#E4B2B2] px-4 text-[16px] font-medium text-[#151210] transition hover:opacity-90 disabled:opacity-70"
           >
             {submitting ? "Saving..." : "Save"}

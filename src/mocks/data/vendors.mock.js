@@ -117,9 +117,11 @@ export const vendorsOverviewMock = {
     },
   ],
 
-  // NOTE: commission is SALE-BASED and PER-VENDOR. `commissionRate` is snapshotted
-  // from the vendor at payout time; `commissionAmount = round(totalSales * rate / 100)`
-  // and `netPayout = totalSales - commissionAmount` (what admin pays the vendor).
+  // NOTE: commission is SALE-BASED and PER-VENDOR. `commissionRate`/`additionalCostPercent`
+  // are snapshotted from the vendor at payout time. `commissionAmount = round(sales * rate/100)`,
+  // `additionalCostAmount = round(sales * additionalCostPercent/100)`, and
+  // `netPayout = sales - commissionAmount - additionalCostAmount` (what admin pays the vendor).
+  // `deliveryFees` ([{ fee %, radius km }]) are captured per vendor but not deducted from the payout.
   payouts: [
     {
       id: "payout-001",
@@ -132,7 +134,10 @@ export const vendorsOverviewMock = {
       status: "pending",
       commissionRate: 10,
       commissionAmount: 3435,
-      netPayout: 30910,
+      additionalCostPercent: 5,
+      additionalCostAmount: 1717,
+      deliveryFees: [{ fee: 5, radius: 5 }],
+      netPayout: 29193,
     },
     {
       id: "payout-002",
@@ -145,7 +150,10 @@ export const vendorsOverviewMock = {
       status: "pending",
       commissionRate: 12,
       commissionAmount: 6240,
-      netPayout: 45760,
+      additionalCostPercent: 5,
+      additionalCostAmount: 2600,
+      deliveryFees: [{ fee: 5, radius: 5 }],
+      netPayout: 43160,
     },
     {
       id: "payout-003",
@@ -158,7 +166,10 @@ export const vendorsOverviewMock = {
       status: "in-progress",
       commissionRate: 8,
       commissionAmount: 1480,
-      netPayout: 17020,
+      additionalCostPercent: 5,
+      additionalCostAmount: 925,
+      deliveryFees: [{ fee: 5, radius: 5 }],
+      netPayout: 16095,
     },
     {
       id: "payout-004",
@@ -171,7 +182,10 @@ export const vendorsOverviewMock = {
       status: "pending",
       commissionRate: 15,
       commissionAmount: 4095,
-      netPayout: 23205,
+      additionalCostPercent: 5,
+      additionalCostAmount: 1365,
+      deliveryFees: [{ fee: 5, radius: 5 }],
+      netPayout: 21840,
     },
     {
       id: "payout-005",
@@ -184,7 +198,10 @@ export const vendorsOverviewMock = {
       status: "paid",
       commissionRate: 10,
       commissionAmount: 4120,
-      netPayout: 37080,
+      additionalCostPercent: 5,
+      additionalCostAmount: 2060,
+      deliveryFees: [{ fee: 5, radius: 5 }],
+      netPayout: 35020,
     },
     {
       id: "payout-006",
@@ -197,7 +214,10 @@ export const vendorsOverviewMock = {
       status: "pending",
       commissionRate: 10,
       commissionAmount: 2990,
-      netPayout: 26910,
+      additionalCostPercent: 5,
+      additionalCostAmount: 1495,
+      deliveryFees: [{ fee: 5, radius: 5 }],
+      netPayout: 25415,
     },
   ],
 };
