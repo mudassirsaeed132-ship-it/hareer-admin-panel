@@ -200,6 +200,16 @@ export async function saveVendorCommissionSettings(payoutId, payload) {
   const deliveryFees = Array.isArray(payload?.deliveryFees) ? payload.deliveryFees : [];
   const settings = { commissionRate, additionalCostPercent, deliveryFees };
 
+  // A manually edited sales amount only overrides the payout being edited;
+  // the rate/additional-cost settings still apply to all of the vendor's payouts.
+  const hasSalesOverride =
+    payload?.totalSales !== undefined &&
+    payload?.totalSales !== null &&
+    payload?.totalSales !== "";
+  const overriddenSales = hasSalesOverride
+    ? Math.max(0, Number(payload.totalSales) || 0)
+    : null;
+
   const vendorIndex = overviewDb.vendors.findIndex((item) => item.id === vendorId);
   if (vendorIndex >= 0) {
     overviewDb.vendors[vendorIndex] = {
@@ -221,7 +231,12 @@ export async function saveVendorCommissionSettings(payoutId, payload) {
       return item;
     }
 
-    return { ...item, ...computePayoutCommission(item.totalSales, settings) };
+    const sales =
+      item.id === payoutId && overriddenSales !== null
+        ? overriddenSales
+        : item.totalSales;
+
+    return { ...item, totalSales: sales, ...computePayoutCommission(sales, settings) };
   });
 
   return {

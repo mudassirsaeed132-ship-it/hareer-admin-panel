@@ -39,19 +39,21 @@ export default function CommissionSettingsModal({
   onSubmit,
   submitting = false,
 }) {
+  const [totalSales, setTotalSales] = useState("");
   const [commissionRate, setCommissionRate] = useState("10");
   const [additionalCostPercent, setAdditionalCostPercent] = useState("5");
   const [deliveryFees, setDeliveryFees] = useState([makeDeliveryRow()]);
 
   useEffect(() => {
     if (!open || !payout) return;
+    setTotalSales(String(payout.totalSales ?? 0));
     setCommissionRate(String(payout.commissionRate ?? 10));
     setAdditionalCostPercent(String(payout.additionalCostPercent ?? 5));
     setDeliveryFees(normalizeDeliveryFees(payout));
   }, [open, payout]);
 
   const totals = useMemo(() => {
-    const salesAmount = Number(payout?.totalSales ?? 0);
+    const salesAmount = Math.max(0, Number(totalSales) || 0);
     const currency = payout?.currency ?? "LYD";
     const commissionAmount = Math.round((salesAmount * clampRate(commissionRate)) / 100);
     const additionalCostAmount = Math.round(
@@ -59,7 +61,7 @@ export default function CommissionSettingsModal({
     );
 
     return { salesAmount, currency, commissionAmount, additionalCostAmount };
-  }, [commissionRate, additionalCostPercent, payout]);
+  }, [totalSales, commissionRate, additionalCostPercent, payout]);
 
   const updateDeliveryRow = (index, key, value) => {
     setDeliveryFees((rows) =>
@@ -77,12 +79,17 @@ export default function CommissionSettingsModal({
     );
   };
 
+  const isSalesValid =
+    totalSales !== "" && Number.isFinite(Number(totalSales)) && Number(totalSales) >= 0;
+
   const canSubmit =
+    isSalesValid &&
     isValidPercent(commissionRate) &&
     isValidPercent(additionalCostPercent, { allowEmpty: true }) &&
     !submitting;
 
   const handleReset = () => {
+    setTotalSales(String(payout?.totalSales ?? 0));
     setCommissionRate(String(payout?.commissionRate ?? 10));
     setAdditionalCostPercent(String(payout?.additionalCostPercent ?? 5));
     setDeliveryFees(normalizeDeliveryFees(payout));
@@ -93,6 +100,7 @@ export default function CommissionSettingsModal({
     if (!canSubmit) return;
 
     await onSubmit?.({
+      totalSales: Math.max(0, Number(totalSales) || 0),
       commissionRate: clampRate(commissionRate),
       additionalCostPercent: clampRate(additionalCostPercent),
       deliveryFees: deliveryFees.map((row) => ({
@@ -116,10 +124,16 @@ export default function CommissionSettingsModal({
       showCloseButton={false}
     >
       <form onSubmit={handleSubmit} className="space-y-3">
-        <CommissionField label="Total Sales Amount">
-          <div className="text-[16px] font-medium text-[#151210]">
-            {formatCurrency(totals.salesAmount, totals.currency)}
-          </div>
+        <CommissionField label="Total Sales Amount" hint={totals.currency}>
+          <input
+            type="number"
+            min="0"
+            inputMode="decimal"
+            value={totalSales}
+            onChange={(event) => setTotalSales(event.target.value)}
+            placeholder="0"
+            className={commissionInputClassName}
+          />
         </CommissionField>
 
         <CommissionField label="Commission Rate (%)">
