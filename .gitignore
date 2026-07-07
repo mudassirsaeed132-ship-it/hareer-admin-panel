@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Claude Code / AI-generated docs (kept out of the shared repo)
+/CLAUDE.md
+/docs/ARCHITECTURE.md

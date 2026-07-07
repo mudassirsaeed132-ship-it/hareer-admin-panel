@@ -6,13 +6,17 @@ import Topbar from "../../shared/layout/Topbar";
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <AppShell
+      isCollapsed={sidebarCollapsed}
       sidebar={
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         />
       }
       header={<Topbar onOpenSidebar={() => setSidebarOpen(true)} />}

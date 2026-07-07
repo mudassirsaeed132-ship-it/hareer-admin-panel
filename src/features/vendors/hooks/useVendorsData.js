@@ -136,16 +136,19 @@ export default function useVendorsData() {
   const handleSaveCommissionSettings = useCallback(async (payoutId, payload) => {
     setSubmitting(true);
     try {
-      const updated = await saveVendorCommissionSettings(payoutId, payload);
+      const result = await saveVendorCommissionSettings(payoutId, payload);
 
       updateCache((previous) => ({
         ...previous,
-        payouts: previous.payouts.map((item) =>
-          item.id === payoutId ? updated : item
+        vendors: previous.vendors.map((item) =>
+          item.id === result.vendorId
+            ? { ...item, commissionRate: result.commissionRate }
+            : item
         ),
+        payouts: Array.isArray(result.payouts) ? result.payouts : previous.payouts,
       }));
 
-      return updated;
+      return result;
     } finally {
       setSubmitting(false);
     }

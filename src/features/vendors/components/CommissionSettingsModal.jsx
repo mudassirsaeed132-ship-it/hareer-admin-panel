@@ -13,6 +13,12 @@ function FieldCard({ label, children }) {
   );
 }
 
+function clampRate(value) {
+  const rate = Number(value);
+  if (!Number.isFinite(rate)) return 0;
+  return Math.min(100, Math.max(0, rate));
+}
+
 export default function CommissionSettingsModal({
   open,
   onClose,
@@ -21,40 +27,37 @@ export default function CommissionSettingsModal({
   submitting = false,
 }) {
   const [commissionRate, setCommissionRate] = useState("10");
-  const [additionalCostPercent, setAdditionalCostPercent] = useState("5");
 
   useEffect(() => {
     if (!open || !payout) return;
-
     setCommissionRate(String(payout.commissionRate ?? 10));
-    setAdditionalCostPercent(String(payout.additionalCostPercent ?? 5));
   }, [open, payout]);
 
   const totals = useMemo(() => {
     const salesAmount = Number(payout?.totalSales ?? 0);
     const currency = payout?.currency ?? "LYD";
-    const commissionAmount = Math.round(
-      (salesAmount * Number(commissionRate || 0)) / 100
-    );
-    const additionalCostAmount = Math.round(
-      (salesAmount * Number(additionalCostPercent || 0)) / 100
-    );
+    const rate = clampRate(commissionRate);
+    const commissionAmount = Math.round((salesAmount * rate) / 100);
 
     return {
       salesAmount,
       commissionAmount,
-      additionalCostAmount,
+      netPayout: salesAmount - commissionAmount,
       currency,
     };
-  }, [additionalCostPercent, commissionRate, payout]);
+  }, [commissionRate, payout]);
+
+  const rateIsValid =
+    commissionRate !== "" &&
+    Number.isFinite(Number(commissionRate)) &&
+    Number(commissionRate) >= 0 &&
+    Number(commissionRate) <= 100;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!rateIsValid) return;
 
-    await onSubmit?.({
-      commissionRate: Number(commissionRate),
-      additionalCostPercent: Number(additionalCostPercent),
-    });
+    await onSubmit?.({ commissionRate: clampRate(commissionRate) });
   };
 
   return (
@@ -62,7 +65,11 @@ export default function CommissionSettingsModal({
       open={open}
       onClose={onClose}
       title="Commission Settings"
-      subtitle="Manually calculate vendor payouts and your commission based on agreed terms."
+      subtitle={
+        payout?.vendorName
+          ? `Set the commission rate for ${payout.vendorName}. It applies to all of this vendor's unpaid payouts.`
+          : "Set the vendor's commission rate. It applies to all of their unpaid payouts."
+      }
       maxWidthClassName="max-w-[476px]"
       panelClassName="bg-white"
       bodyClassName="bg-white"
@@ -80,20 +87,20 @@ export default function CommissionSettingsModal({
         <FieldCard label="Commission Rate (%)">
           <input
             type="number"
+            min="0"
+            max="100"
+            step="0.1"
             value={commissionRate}
             onChange={(event) => setCommissionRate(event.target.value)}
             className="w-full border-none bg-transparent p-0 text-[16px] text-[#151210] outline-none"
           />
         </FieldCard>
 
-        <FieldCard label="Additional Costs (Optional)">
-          <input
-            type="number"
-            value={additionalCostPercent}
-            onChange={(event) => setAdditionalCostPercent(event.target.value)}
-            className="w-full border-none bg-transparent p-0 text-[16px] text-[#151210] outline-none"
-          />
-        </FieldCard>
+        {!rateIsValid ? (
+          <p className="text-[13px] leading-none text-[#F04444]">
+            Enter a commission rate between 0 and 100.
+          </p>
+        ) : null}
 
         <div className="border-t border-[#E7E1DE] pt-4">
           <div className="flex items-center justify-between gap-4 py-1 text-[16px] text-[#6F6965]">
@@ -103,26 +110,26 @@ export default function CommissionSettingsModal({
             </span>
           </div>
           <div className="flex items-center justify-between gap-4 py-1 text-[16px] text-[#6F6965]">
-            <span>Commission Rate</span>
+            <span>Commission ({clampRate(commissionRate)}%)</span>
             <span className="font-medium text-[#151210]">
-              {formatCurrency(totals.commissionAmount, totals.currency)} ({commissionRate}%)
+              − {formatCurrency(totals.commissionAmount, totals.currency)}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-4 py-1 text-[16px] text-[#6F6965]">
-            <span>Additional Cost</span>
-            <span className="font-medium text-[#151210]">
-              {formatCurrency(totals.additionalCostAmount, totals.currency)} ({additionalCostPercent}%)
-            </span>
-          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 bg-[#FAF3F3] px-4 py-3">
+          <span className="text-[15px] font-medium text-[#151210]">
+            Net Payout to Vendor
+          </span>
+          <span className="text-[18px] font-semibold text-[#151210]">
+            {formatCurrency(totals.netPayout, totals.currency)}
+          </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => {
-              setCommissionRate(String(payout?.commissionRate ?? 10));
-              setAdditionalCostPercent(String(payout?.additionalCostPercent ?? 5));
-            }}
+            onClick={() => setCommissionRate(String(payout?.commissionRate ?? 10))}
             className="inline-flex h-[50px] items-center justify-center border border-[#E7E1DE] bg-white px-4 text-[16px] font-medium text-[#151210]"
           >
             Reset
@@ -130,7 +137,7 @@ export default function CommissionSettingsModal({
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !rateIsValid}
             className="inline-flex h-[50px] items-center justify-center bg-[#E4B2B2] px-4 text-[16px] font-medium text-[#151210] transition hover:opacity-90 disabled:opacity-70"
           >
             {submitting ? "Saving..." : "Save"}

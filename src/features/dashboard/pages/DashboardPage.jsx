@@ -12,6 +12,7 @@ import DashboardMetrics from "../components/DashboardMetrics";
 import OrdersOverviewChart from "../components/OrdersOverviewChart";
 import PaymentsOverviewChart from "../components/PaymentsOverviewChart";
 import TopSellingStoresTable from "../components/TopSellingStoresTable";
+import CommissionCalculatorButton from "../components/CommissionCalculatorButton";
 import {
   DEFAULT_DASHBOARD_DATE_RANGE,
   DASHBOARD_SECTION_TRANSITION,
@@ -161,6 +162,8 @@ export default function DashboardPage() {
             setIsDateRangeModalOpen(false);
           }}
         />
+
+        <CommissionCalculatorButton />
       </div>
     </LazyMotion>
   );

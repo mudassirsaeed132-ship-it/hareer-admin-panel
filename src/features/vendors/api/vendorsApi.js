@@ -29,6 +29,27 @@ function updateDetailServiceRequest(requestId, updater) {
   });
 }
 
+const DEFAULT_COMMISSION_RATE = 10;
+
+function clampRate(value) {
+  const rate = Number(value);
+  if (!Number.isFinite(rate)) return 0;
+  return Math.min(100, Math.max(0, rate));
+}
+
+// Sale-based commission: rate is a % of the vendor's gross sales for the period.
+function computePayoutCommission(totalSales, rate) {
+  const sales = Number(totalSales) || 0;
+  const commissionRate = clampRate(rate);
+  const commissionAmount = Math.round((sales * commissionRate) / 100);
+
+  return {
+    commissionRate,
+    commissionAmount,
+    netPayout: sales - commissionAmount,
+  };
+}
+
 export async function getVendorsOverview({ signal } = {}) {
   await delay(120, { signal });
   return deepClone(overviewDb);
@@ -87,6 +108,7 @@ export async function reviewVendorRequest(requestId, decision) {
       website: selectedRequest.website,
       location: selectedRequest.location,
       status: "active",
+      commissionRate: DEFAULT_COMMISSION_RATE,
     };
 
     overviewDb.vendors.unshift(createdVendor);
@@ -151,30 +173,45 @@ export async function rejectVendorServiceRequest(requestId) {
   return { success: true, requestId };
 }
 
+// Commission is per-vendor: saving a rate stores it on the vendor and re-applies it
+// to every not-yet-paid payout for that vendor (paid payouts are already settled).
 export async function saveVendorCommissionSettings(payoutId, payload) {
   await delay(180);
 
-  const index = overviewDb.payouts.findIndex((item) => item.id === payoutId);
+  const payout = overviewDb.payouts.find((item) => item.id === payoutId);
 
-  if (index < 0) {
+  if (!payout) {
     throw new Error("Payout not found.");
   }
 
-  const totalSales = Number(overviewDb.payouts[index].totalSales);
-  const commissionRate = Number(payload?.commissionRate);
-  const additionalCostPercent = Number(payload?.additionalCostPercent);
-  const commissionAmount = Math.round((totalSales * commissionRate) / 100);
-  const additionalCostAmount = Math.round((totalSales * additionalCostPercent) / 100);
+  const { vendorId } = payout;
+  const commissionRate = clampRate(payload?.commissionRate);
 
-  overviewDb.payouts[index] = {
-    ...overviewDb.payouts[index],
+  const vendorIndex = overviewDb.vendors.findIndex((item) => item.id === vendorId);
+  if (vendorIndex >= 0) {
+    overviewDb.vendors[vendorIndex] = {
+      ...overviewDb.vendors[vendorIndex],
+      commissionRate,
+    };
+  }
+
+  if (detailDb[vendorId]) {
+    detailDb[vendorId].commissionRate = commissionRate;
+  }
+
+  overviewDb.payouts = overviewDb.payouts.map((item) => {
+    if (item.vendorId !== vendorId || item.status === "paid") {
+      return item;
+    }
+
+    return { ...item, ...computePayoutCommission(item.totalSales, commissionRate) };
+  });
+
+  return {
+    vendorId,
     commissionRate,
-    additionalCostPercent,
-    commissionAmount,
-    additionalCostAmount,
+    payouts: deepClone(overviewDb.payouts),
   };
-
-  return deepClone(overviewDb.payouts[index]);
 }
 
 export async function releaseVendorPayout(payoutId) {

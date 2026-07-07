@@ -89,9 +89,33 @@ const EXPORT_CONFIG = {
         label: "Commission Amount",
         value: (row) => `${row.commissionAmount ?? 0} ${row.currency ?? ""}`.trim(),
       },
+      {
+        label: "Net Payout",
+        value: (row) => `${row.netPayout ?? 0} ${row.currency ?? ""}`.trim(),
+      },
     ],
   },
 };
+
+const PAYOUT_INVOICE_COLUMNS = [
+  { label: "Vendor", value: (row) => row.vendorName },
+  { label: "Owner Name", value: (row) => row.ownerName },
+  { label: "Month", value: (row) => row.month },
+  {
+    label: "Total Sales",
+    value: (row) => `${row.totalSales ?? 0} ${row.currency ?? ""}`.trim(),
+  },
+  { label: "Commission Rate", value: (row) => `${row.commissionRate ?? 0}%` },
+  {
+    label: "Commission Amount",
+    value: (row) => `${row.commissionAmount ?? 0} ${row.currency ?? ""}`.trim(),
+  },
+  {
+    label: "Net Payout",
+    value: (row) => `${row.netPayout ?? 0} ${row.currency ?? ""}`.trim(),
+  },
+  { label: "Status", value: (row) => row.status },
+];
 
 function VendorsPageSkeleton() {
   return (
@@ -384,6 +408,43 @@ export default function VendorsPage() {
     }
   };
 
+  const handleReleasePayoutRow = async (row) => {
+    const actionLabel = row.status === "in-progress" ? "marked as paid" : "released";
+
+    try {
+      await handleReleasePayout(row.id);
+      showFeedback(
+        "success",
+        `Payout for ${row.vendorName} has been ${actionLabel}.`
+      );
+    } catch {
+      showFeedback(
+        "error",
+        `Unable to update the payout for ${row.vendorName}. Please try again.`
+      );
+    }
+  };
+
+  const handleDownloadInvoice = (row) => {
+    try {
+      const downloaded = downloadPdfFile({
+        fileName: `payout-invoice-${row.id}.pdf`,
+        title: `Payout Invoice — ${row.vendorName}`,
+        rows: [row],
+        columns: PAYOUT_INVOICE_COLUMNS,
+      });
+
+      if (!downloaded) {
+        showFeedback("error", "Unable to generate the invoice.");
+        return;
+      }
+
+      showFeedback("success", `Invoice for ${row.vendorName} downloaded.`);
+    } catch {
+      showFeedback("error", "Unable to generate the invoice. Please try again.");
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -555,7 +616,8 @@ export default function VendorsPage() {
                 rows={paginatedRows}
                 startIndex={pageStartIndex}
                 onOpenCommission={(row) => setSelectedPayout(row)}
-                onReleasePayment={(row) => handleReleasePayout(row.id)}
+                onReleasePayment={handleReleasePayoutRow}
+                onDownloadInvoice={handleDownloadInvoice}
               />
             ) : null}
 
@@ -585,8 +647,19 @@ export default function VendorsPage() {
           payout={selectedPayout}
           submitting={submitting}
           onSubmit={async (payload) => {
-            await handleSaveCommissionSettings(selectedPayout.id, payload);
-            setSelectedPayout(null);
+            try {
+              await handleSaveCommissionSettings(selectedPayout.id, payload);
+              showFeedback(
+                "success",
+                `Commission rate updated for ${selectedPayout.vendorName}.`
+              );
+              setSelectedPayout(null);
+            } catch {
+              showFeedback(
+                "error",
+                "Unable to update commission. Please try again."
+              );
+            }
           }}
         />
       </div>
