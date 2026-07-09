@@ -4,7 +4,7 @@ export default function ChartTooltip({ className = "", children }) {
   return (
     <div
       className={cn(
-        "rounded-[6px] border border-[#E8E1DE] bg-white p-3 shadow-[0_10px_28px_rgba(26,18,16,0.08)] xl:p-4",
+        "rounded-md border border-[#E8E1DE] bg-white p-3 shadow-[0_10px_28px_rgba(26,18,16,0.08)] xl:p-4",
         className
       )}
     >
